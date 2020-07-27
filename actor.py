@@ -295,9 +295,13 @@ class Actor:
         #Drop Items
         for item in self.Inventory.keys():
             if self.Inventory[item] > 0:
-                Player.add_item_to_inventory(item, self.Inventory[item])
-                #{Name} acquired {Amount} {Item}
-                print(Scene.print_message(26, False, "Menu", {"{Name}": Player.Name["Value"], "{Amount}": self.Inventory[item], "{Item}": item}))
+                if "Recipe" not in item:
+                    Player.add_item_to_inventory(item, self.Inventory[item])
+                    #{Name} acquired {Amount} {Item}
+                    print(Scene.print_message(26, False, "Menu", {"{Name}": Player.Name["Value"], "{Amount}": self.Inventory[item], "{Item}": item}))
+                else:
+                    recipe = item.split(' Recipe')
+                    Player.learn_recipe(recipe[0], Scene)
 
     def rest(self):
         self.HP["Value"] = self.HP["Max"]
@@ -768,6 +772,31 @@ class Enemy(Actor):
                 self.Magic["Value"] += 2
                 self.MDef["Value"] += 2
                 self.Inventory["Dirty Finger"] = 1
+        elif type == "Normal":
+            if rando == 1:
+                self.Name["Value"] = "Golem"
+                self.Strength["Value"] += 20
+                self.Def["Value"] += 20
+                self.Magic["Value"] -=3
+                self.MDef["Value"] -= 3
+                self.Inventory["Medicinal Herb"] = 1
+            elif rando == 2:
+                self.Name["Value"] = "Assassin"
+                self.Strength["Value"] += 10
+                self.MDef["Value"] += 10
+                self.Inventory["Mystical Water"] = 1
+            else:
+                self.Name["Value"] = "Wizard"
+                self.Strength["Value"] -= 5
+                self.Def["Value"] -= 3
+                self.Magic["Value"] += 2
+                self.MDef["Value"] += 2
+                self.Fire["Value"] += 3
+                self.Ice["Value"] += 3
+                self.Water["Value"] += 3
+                self.Wind["Value"] += 3
+                self.Lightning["Value"] += 3
+                self.Inventory["Dragon Blood"] = 1
 
     def set_type(self, Type): #self, "Type"
         #Enemy Types
@@ -811,6 +840,8 @@ class Enemy(Actor):
                 choices = random.randint(0, len(options) -1)
             else:
                 choices = 0
+            if options[choices] == "Attack":
+                loop = False
             for a in range(len(self.Stats)):
                 if self.Stats[a]["Name"] == options[choices]:
                     if "Duration" in self.Stats[a]:
@@ -818,6 +849,7 @@ class Enemy(Actor):
                             loop = False
                     else:
                         loop = False
+        print("AI Chose: " + str(options[choices]))
         return options[choices]
 
     def AI_attack(self, type, Enemy, Game_State, Scene): #self, "type", Class, Class, Class

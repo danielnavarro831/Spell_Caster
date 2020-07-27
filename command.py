@@ -216,8 +216,9 @@ class Command:
         Player.XP["Value"] = Player.XP["Max"]
         Player.check_XP(Scene)
 
-    def kill(self, Enemy): #self, Class
+    def kill(self, Enemy, Game_State): #self, Class
         Enemy.HP["Value"] = 0
+        Game_State.battle = False
 
     def solve(self, Room): #self, Class
         if len(Room.Interactables) > 0:
@@ -306,15 +307,19 @@ class Command:
         #---------------------------------------------------------------------
         elif self.bools["Status"] == True and Game_State.Debug == True:
             print(Enemy.Scan(Scene))
+            Game_State.next_turn = False
         elif word == "Pockets" and Game_State.Debug == True:
             self.fill_inventory(Player)
+            Game_State.next_turn = False
             print(" * Debug: Inventory Filled")
         elif word == "Avada Kedavra" and Game_State.Debug == True:
-            self.kill(Enemy)
+            self.kill(Enemy, Game_State)
         elif word == "Deplete MP" and Game_State.Debug == True:
             self.depletemp(Player)
+            Game_State.next_turn = False
         elif word == "Deplete HP" and Game_State.Debug == True:
             self.depletehp(Player)
+            Game_State.next_turn = False
         elif word == self.Cheat:
             if Game_State.Debug == True:
                 Game_State.Debug = False

@@ -484,7 +484,7 @@ class Dungeon(Room):
             #Randomize enemy traits
             random.shuffle(self.Type)
             #Randomize enemy loot drops
-            Loot = ["Potion", "Hi-Potion", "Ether", "Hi-Ether"]
+            Loot = ["Potion", "Hi-Potion", "Ether", "Hi-Ether", "Potion Recipe", "Hi-Potion Recipe", "Ether Recipe", "Hi-Ether Recipe"]
             random.shuffle(Loot)
             enemy = Enemy(self.Level, "", self.Type[0], [self.Type[0]], Game_State.get_loot_drops(Loot[0]))
             enemy.add_variance(self.Type[0])
@@ -494,19 +494,19 @@ class Dungeon(Room):
         Game_State.start_battle(Player, enemy, Controller, Scene)
 
     def get_boss(self):
-        if self.Type == ["Fire"]:
+        if "Fire" in self.Type:
             enemy = Enemy(1, "Grand Dragon", "", ["Fire", "Shell"], [])
             enemy.make_boss()
-        elif self.Type == ["Ice"]:
+        elif "Ice" in self.Type:
             enemy = Enemy(1, "Yetti", "", ["Ice", "Protect"], [])
             enemy.make_boss()
-        elif self.Type == ["Water"]:
+        elif "Water" in self.Type:
             enemy = Enemy(1, "Leviathan", "", ["Water"], [])
             enemy.make_boss()
-        elif self.Type == ["Wind"]:
+        elif "Wind" in self.Type:
             enemy = Enemy(1, "Ancient Tree", "", ["Wind", "Regen"], [])
             enemy.make_boss()
-        elif self.Type == ["Lightning"]:
+        elif "Lightning" in self.Type:
             enemy = Enemy(1, "Thunderbird", "", ["Wind", "Lightning"], [])
             enemy.make_boss()
         else:

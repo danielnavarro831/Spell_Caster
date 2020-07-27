@@ -76,6 +76,7 @@ class Game:
                 controller.get_command(Player, Enemy, self, Scene)
         if self.battle == True:
             if Enemy.enemy == True:
+                print("Enemy attacking")
                 Enemy.AI_attack(Enemy.choose_attack(), Player, self, Scene)
             if self.game_over == False:
                 duration_spells = Spell(Player)
@@ -102,15 +103,19 @@ class Game:
         Base = 80
         #Potion Inventories
         potion = [{"Name": "Potion", "Value": 1, "Chance": Base}]
+        potion_recipe = [{"Name": "Potion Recipe", "Value": 1, "Chance": Base}]
         hi_potion = [{"Name": "Hi-Potion", "Value": 1, "Chance": Base - 20}]
+        hi_potion_recipe = [{"Name": "Hi-Potion Recipe", "Value": 1, "Chance": Base - 20}]
         mega_potion = [{"Name": "Mega-Potion", "Value": 1, "Chance": Base - 40}]
-        potions = {"Potion": potion, "Hi-Potion": hi_potion, "Mega-Potion": mega_potion}
+        potions = {"Potion": potion, "Hi-Potion": hi_potion, "Mega-Potion": mega_potion, "Potion Recipe": potion_recipe, "Hi-Potion Recipe": hi_potion_recipe}
 
         #Ether Inventories
         ether = [{"Name": "Ether", "Value": 1, "Chance": Base}]
+        ether_recipe = [{"Name": "Ether Recipe", "Value": 1, "Chance": Base}]
         hi_ether = [{"Name": "Hi-Ether", "Value": 1, "Chance": Base - 20}]
+        hi_ether_recipe = [{"Name": "Hi-Ether Recipe", "Value": 1, "Chance": Base - 20}]
         mega_ether = [{"Name": "Mega-Ether", "Value": 1, "Chance": Base - 40}]
-        ethers = {"Ether": ether, "Hi-Ether": hi_ether, "Mega-Ether": mega_ether}
+        ethers = {"Ether": ether, "Hi-Ether": hi_ether, "Mega-Ether": mega_ether, "Ether Recipe": ether_recipe, "Hi-Ether Recipe": hi_ether_recipe}
 
         #Elixir Inventories
         elixir = [{"Name": "Elixir", "Value": 1, "Chance": int(Base/2)}]
@@ -214,19 +219,19 @@ tower5 = Room("Lightning Puzzle Room", 0, [])
 tower5.Floor = 5
 
 #Dungeon 1
-dungeon1 = Dungeon("Fire Dungeon", 7,  [], 1, ["Fire"], 5)
+dungeon1 = Dungeon("Fire Dungeon", 7,  [], 1, ["Fire", "Normal"], 5)
 
 #Dungeon 2
-dungeon2 = Dungeon("Ice Dungeon", 0, [], 2, ["Ice"], 6)
+dungeon2 = Dungeon("Ice Dungeon", 0, [], 2, ["Ice", "Normal"], 6)
 
 #Dungeon 3
-dungeon3 = Dungeon("Water Dungeon", 0, [], 3, ["Water"], 7)
+dungeon3 = Dungeon("Water Dungeon", 0, [], 3, ["Water", "Normal"], 7)
 
 #Dungeon 4
-dungeon4 = Dungeon("Wind Dungeon", 0, [], 4, ["Wind"], 8)
+dungeon4 = Dungeon("Wind Dungeon", 0, [], 4, ["Wind", "Normal"], 8)
 
 #Dungeon 5
-dungeon5 = Dungeon("Lightning Dungeon", 0, [], 5, ["Lightning"], 9)
+dungeon5 = Dungeon("Lightning Dungeon", 0, [], 5, ["Lightning", "Normal"], 9)
 
 Game_State.tower = [dungeon5, dungeon4, dungeon3, dungeon2, dungeon1, 
              ground_floor, 
