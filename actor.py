@@ -2,6 +2,7 @@ import random
 from spell import Spell
 from item import Item
 import xlrd
+from files import Files
 
 class Actor:
     def __init__(self, level, name): #self, int, "Name"
@@ -49,6 +50,10 @@ class Actor:
                        "Protect": self.Protect, "Shell": self.Shell}
 
         self.Self_Target = [self.Cure["Name"], self.Regen["Name"], self.Protect["Name"], self.Shell["Name"]]
+
+        file = Files()
+        self.path = file.doc_path
+        file.__delete__()
 
     def __delete__(self):
         del self
@@ -432,7 +437,7 @@ class Player(Actor):
     def brew_potion(self, Scene, Controller, Game_State): #self, Class, Class, Class
         #Player, Scene, self, Game_State)
         if self.spend_MP(self.Water["Name"], Game_State, Scene) == True:
-            source = xlrd.open_workbook('C:\\Users\\Daniel\\source\\repos\\Spell Caster\\Spell_Caster_Strings.xlsx')
+            source = xlrd.open_workbook(self.path)
             Sheet = source.sheet_by_index(7) #Recipes page
             #Casts water
             print(Scene.print_message(35, False, "Menu", {"{Name}": self.Name["Value"], "{Spell}": self.Water["Name"]}))
@@ -496,9 +501,9 @@ class Player(Actor):
                         while len(ingredients) < 3:
                             ingredients.append("Exit")
                             loop = False
-                    elif response in Controller.Recipes:
-                        pass
+                    elif response in Controller.recipes:
                         #Lists recipes
+                        self.view_recipes(Controller, Scene)
                     else:
                         #None in inventory
                         print(Scene.print_message(2, False, "Menu", {}))
@@ -537,6 +542,41 @@ class Player(Actor):
             else:
                 #Cauldron magically empties
                 print(Scene.print_message(68, False, "Menu", {}))
+
+    def learn_recipe(self, Recipe, Scene):
+        Recipe = Recipe.title()
+        if Recipe not in self.Recipes:
+            self.Recipes.append(Recipe)
+            print(Scene.print_message(80, False, "Menu", {"{Name}": self.Name["Value"], "{Potion}":Recipe}))
+
+    def view_recipes(self, Controller, Scene):
+        loop = True
+        while loop == True:
+            print(Scene.print_message(81, False, "Menu", {}))
+            if len(self.Recipes) > 0:
+                for recipe in range(len(self.Recipes)):
+                    print(" * " + self.Recipes[recipe])
+            else:
+                print(Scene.print_message(82, False, "Menu", {}))
+            print(Scene.print_message(83, False, "Menu", {}))
+            print(Scene.print_message(65, False, "Menu", {}))
+            response = Controller.get_response(self, False)
+            response = response.title()
+            if response in self.Recipes:
+                source = xlrd.open_workbook(self.path)
+                Sheet = source.sheet_by_index(7) #Recipes page
+                row = 0
+                while Sheet.cell(row, 0).value != response:
+                    row += 1
+                    if Sheet.cell(row, 0).value == response:
+                        recipe = " " + response + ": " + Sheet.cell(row, 1).value + ", " + Sheet.cell(row, 2).value + ", " + Sheet.cell(row, 3).value
+                        print(recipe)
+                        loop = False
+            elif response in Controller.exit:
+                loop = False
+            else:
+                print(Scene.print_message(84, False, "Menu", {}))
+
 #------------------------------------------------------------------------------------------------------------------------------------------
 #                                                                  ENEMY CLASS
 #------------------------------------------------------------------------------------------------------------------------------------------
@@ -559,7 +599,7 @@ class Enemy(Actor):
             self.fill_inventory(Inventory)
 
     def make_boss(self):
-        source = xlrd.open_workbook('C:\\Users\\Daniel\\source\\repos\\Spell Caster\\Spell_Caster_Strings.xlsx')
+        source = xlrd.open_workbook(self.path)
         Sheet = source.sheet_by_index(4) #Bosses Page
         column = 0
         while Sheet.cell(column, 0).value != self.Name["Value"]:

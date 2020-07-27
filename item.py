@@ -1,11 +1,15 @@
 import xlrd
 import random
+from files import Files
 
 class Item:
     def __init__(self, name): #self, "name"
         name = name.title()
         self.Info = {"Name": name}
-        source = xlrd.open_workbook('C:\\Users\\Daniel\\source\\repos\\Spell Caster\\Spell_Caster_Strings.xlsx')
+        file = Files()
+        self.path = file.doc_path
+        file.__delete__()
+        source = xlrd.open_workbook(self.path)
         Sheet = source.sheet_by_index(6)
         row = 0
         while Sheet.cell(row, 0).value != self.Info["Name"]:

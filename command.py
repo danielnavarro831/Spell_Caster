@@ -2,6 +2,7 @@ from item import *
 from room import *
 from scene import Scene
 import xlrd
+from files import Files
 
 class Command:
     def __init__(self, Player): #self, Class
@@ -16,7 +17,7 @@ class Command:
         self.up = ["Up", "Ascend"]
         self.down = ["Down", "Descend"]
         self.resume = ["Continue", "Resume"]
-        self.Recipes = ["Recipe", "Recipes", "Instructions"]
+        self.recipes = ["Recipe", "Recipes", "Instructions"]
         self.inventory = ["Items", "Inventory", "Potions", "Ethers", "Elixirs"]
         self.examine = ["Examine", "Inspect", "Observe", "Look", "Check"]
         self.spellbook = ["Magic", "Spells", "Spell", "Spellbook"]
@@ -24,7 +25,12 @@ class Command:
         self.status = ["Status", "Stats", "Self", "Scan"]
         self.Cheat = "Pumpkin Eater"
         self.bools = {"Yes": False, "No": False, "Attack": False, "Exit": False, "Up": False, "Down": False,  
-                      "Resume": False, "Inventory": False, "Examine": False, "Spellbook": False, "Help": False, "Status": False}
+                      "Resume": False, "Inventory": False, "Examine": False, "Spellbook": False, "Help": False, 
+                      "Status": False, "Recipes": False}
+
+        file = Files()
+        self.path = file.doc_path
+        file.__delete__()
 
     def check_terms(self, response): #self, "response"
         response = response.title()
@@ -40,6 +46,7 @@ class Command:
         spellbook = False
         help = False
         status = False
+        recipes = False
         for a in range(len(self.yes)):
             if self.yes[a] in response:
                 yes = True
@@ -76,9 +83,12 @@ class Command:
         for l in range(len(self.status)):
             if self.status[l] in response:
                 status = True
+        for m in range(len(self.recipes)):
+            if self.recipes[m] in response:
+                recipes = True
         self.bools = {"Yes": yes, "No": no, "Attack": attack, "Exit": exit, "Up": up, "Down": down, 
                       "Resume": resume, "Inventory": inventory, "Examine": examine, "Spellbook": spellbook, 
-                      "Help": help, "Status": status}
+                      "Help": help, "Status": status, "Recipes": recipes}
 
     def get_speaker_name(self, Player, Key, Scene, Scene_num): #self, Class, "Key", Class, [Scene_num0, Scene_num1, Scene_num2]
         loop = True
@@ -191,7 +201,7 @@ class Command:
 #                                                                  Debug Commands
 #-----------------------------------------------------------------------------------------------------------------------------------------
     def fill_inventory(self, Player): #self, Class
-        source = xlrd.open_workbook('C:\\Users\\Daniel\\source\\repos\\Spell Caster\\Spell_Caster_Strings.xlsx')
+        source = xlrd.open_workbook(self.path)
         Sheet = source.sheet_by_index(6)
         row = 1
         loop = True
@@ -369,6 +379,8 @@ class Command:
             item.__delete__()
         elif response in self.inventory:
             Player.get_inventory(Scene)
+        elif self.bools["Recipes"] == True:
+            Player.view_recipes(self, Scene)
         #---------------------------------------------------------------------
         #                               Cure
         #---------------------------------------------------------------------
@@ -388,15 +400,17 @@ class Command:
         #---------------------------------------------------------------------
         #                         Continue Fighting
         #---------------------------------------------------------------------
-        elif self.bools["Attack"] == True and Room.Steps_Taken >= Room.Steps and type(Room) is Dungeon:
-            #Continue Fighting
-            Room.start_battle(Player, Scene, self, Game_State)
+        elif self.bools["Attack"] == True and type(Room) is Dungeon:
+            if Room.Steps_Taken >= Room.Steps: 
+                #Continue Fighting
+                Room.start_battle(Player, Scene, self, Game_State)
         #---------------------------------------------------------------------
         #                   Continue Walking Through Dungeon
         #---------------------------------------------------------------------
-        elif self.bools["Attack"] == True or self.bools["Resume"] == True and Room.Steps_Taken < Room.Steps and type(Room) is Dungeon:
+        elif self.bools["Attack"] == True or self.bools["Resume"] == True and type(Room) is Dungeon:
             #Take next step in dungeon
-            Room.Loop = False
+            if Room.Steps_Taken < Room.Steps:
+                Room.Loop = False
         #---------------------------------------------------------------------
         #                               Debug
         #---------------------------------------------------------------------

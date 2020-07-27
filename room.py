@@ -1,6 +1,5 @@
 from actor import *
 import random
-import xlrd
 
 class Interactable:
     def __init__(self, name): #self, "name"
@@ -424,15 +423,12 @@ class Room(Interactable):
                 for a in range(len(self.Interactables)):
                     if "Chest" in self.Interactables[a].Name:
                         if self.Interactables[a].Solved == True:
-                            if "Hi-Potion" not in Player.Recipes:
-                                Player.Recipes.append("Hi-Potion")
-                            print(Scene.print_message(80, False, "Menu", {"{Name}": Player.Name["Value"], "{Potion}": "Hi-Potion"}))
+                            Player.learn_recipe("Hi-Potion", Scene)
                             self.open_chest(Player, Scene, "Hi-Potion", 1)
                             remove = True
                             pos = a
                 if remove == True:
                     del self.Interactables[pos]
-
 
     def tower4(self, Player, Scene, Controller, Game_State): #self, Class, Class, Class
         loop = True

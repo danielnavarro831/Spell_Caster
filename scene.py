@@ -1,10 +1,14 @@
 import xlrd
 import random
+from files import Files
 
 class Scene():
     def __init__(self, Player): #self, Class
         self.Speakers = Player.Speakers
         self.Error = False
+        file = Files()
+        self.path = file.doc_path
+        file.__delete__()
 
     def print_header(self, header_text): #self, "header_text"
         lines = []
@@ -29,7 +33,7 @@ class Scene():
 
     def print_message(self, Scene_Num, Print, Page, Vars): #self, int, Bool, "Page", {"{Vars}": "var"}
         #Get Page
-        source = xlrd.open_workbook('C:\\Users\\Daniel\\source\\repos\\Spell Caster\\Spell_Caster_Strings.xlsx')
+        source = xlrd.open_workbook(self.path)
         if Page.title() == "Menu":
             Sheet = source.sheet_by_index(0)
         elif Page.title() == "Story":
@@ -64,7 +68,7 @@ class Scene():
     def make_line(self, Scene_num, Sheet, Vars): #self, int, "Sheet", {"{Vars}": "Var"}
         lines = []
         if type(Sheet) == str:
-            source = xlrd.open_workbook('C:\\Users\\Daniel\\source\\repos\\Spell Caster\\Spell_Caster_Strings.xlsx')
+            source = xlrd.open_workbook(self.path)
             if Sheet == "Menu":
                 Sheet = source.sheet_by_index(0)
             elif Sheet == "Story":
@@ -94,7 +98,7 @@ class Scene():
         return line
 
     def line_randomizer(self, Scene_nums, Page, Vars): #self, [list, of, scenes], "Menu", [{}, {Vars: 1}, {Vars:2}]
-        source = xlrd.open_workbook('C:\\Users\\Daniel\\source\\repos\\Spell Caster\\Spell_Caster_Strings.xlsx')
+        source = xlrd.open_workbook(self.path)
         if Page.title() == "Menu":
             Sheet = source.sheet_by_index(0)
         elif Page.title() == "Story":
@@ -132,7 +136,7 @@ class Scene():
         var_dic = {"Interactable.Name": Interactable.Name, "Player.Name": Player.Name["Value"], 
                    "Player.Fire": Player.Fire["Name"], "Player.Ice": Player.Ice["Name"], "Player.Lightning": Player.Lightning["Name"],
                    "Player.Water": Player.Water["Name"], "Player.Wind": Player.Wind["Name"]}
-        source = xlrd.open_workbook('C:\\Users\\Daniel\\source\\repos\\Spell Caster\\Spell_Caster_Strings.xlsx')
+        source = xlrd.open_workbook(self.path)
         Sheet = source.sheet_by_index(3)
         line = ""
         loop = True
