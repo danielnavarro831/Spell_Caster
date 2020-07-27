@@ -17,7 +17,7 @@ class Game:
         self.win_condition = "Death"
         self.tower = []
         self.current_floor = ""
-        self.Debug = True
+        self.Debug = False
 
     def win_conditions(self, Player, Enemy): #self, Class, Class
         status = False
