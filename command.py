@@ -162,21 +162,21 @@ class Command:
             self.translate_battle_command(response, Player, Obj, Game_State, Scene)
         elif isinstance(Obj, Room):
             if len(Obj.Interactables) > 0:
+                interactable_command = False
                 for a in range(len(Obj.Interactables)):
                     if type(Obj.Interactables[a].Name) is list:
-                        interactable_command = False
                         for b in range(len(Obj.Interactables[a].Name)):
                             if Obj.Interactables[a].Name[b] in response:
                                 self.translate_interactable_command(response, Player, Obj.Interactables[a], Game_State, Scene)
                                 interactable_command = True
                                 break
-                        if interactable_command == False:
-                            self.translate_room_command(response, Player, Obj, Game_State, Scene)
                     else:
                         if Obj.Interactables[a].Name in response:
                             self.translate_interactable_command(response, Player, Obj.Interactables[a], Game_State, Scene)
-                        else:
-                            self.translate_room_command(response, Player, Obj, Game_State, Scene)
+                            interactable_command = True
+                            break
+                if interactable_command == False:
+                    self.translate_room_command(response, Player, Obj, Game_State, Scene)
             else:
                 self.translate_room_command(response, Player, Obj, Game_State, Scene)
         elif type(Obj) is Interactable:
@@ -192,14 +192,14 @@ class Command:
             commands = ["Attack", "Inventory", "Spellbook"]
         else:
             if Game_State.in_dungeon == False:
-                commands = ["Examine", "Spellbook", "Inventory", "Stats", "Recipes"]
+                commands = ["Examine", "Spellbook", "Inventory", "Stats", "Recipes", "Save", "Quit"]
                 if len(Game_State.get_room_commands()) > 0:
                     commands += Game_State.get_room_commands()
                 if Game_State.check_solved == True:
                     comands += ["Go Up"]
                 commands += ["Go Down"]
             else:
-                commands = ["Fight", "Spellbook", "Inventory", "Stats", "Recipes"]
+                commands = ["Fight", "Spellbook", "Inventory", "Stats", "Recipes", "Save", "Quit"]
                 if Game_State.check_room_steps() == False:
                     commands += ["Continue"]
                 else:
@@ -466,6 +466,11 @@ class Command:
         elif response == "Know It All" and Game_State.Debug == True:
             self.learn_all_spells(Player)
             print(" * Debug: Spells Learned")
+        elif response == "Interactables" and Game_State.Debug == True:
+            for a in range(len(Room.Interactables)):
+                print(str(Room.Interactables[a].Name))
+                for b in range(len(Room.Interactables[a].Keys)):
+                    print(Room.Interactables[a].Keys)
         elif response == self.Cheat:
             if Game_State.Debug == True:
                 Game_State.Debug = False
@@ -478,6 +483,8 @@ class Command:
         #---------------------------------------------------------------------
         elif self.bools["Help"] == True:
             self.get_help(Game_State)
+        elif response == "Quit":
+            Game_State.quit(Player, self, Scene)
 #---------------------------------------------------------------------------------------------------------------------------------------
 #                                                                Interactable Commands
 #---------------------------------------------------------------------------------------------------------------------------------------
@@ -511,13 +518,16 @@ class Command:
         #---------------------------------------------------------------------
         elif Response == "New Game":
             Game_State.loop = False
+            Game_State.menu = False
             Game_State.start_game(Player, self, Scene)
         #---------------------------------------------------------------------
         #                             Continue
         #---------------------------------------------------------------------
-        elif Response == "Continue" and File.Continue == True:
+        elif Response == "Continue" and File.Continue() == True:
             Game_State.loop = False
-            File.load(Player, Game_State, Scene)
+            Game_State.menu = False
+            print(Scene.print_message(90, False, "Menu", {}))
+            File.load(Player, Game_State, self, Scene)
         #---------------------------------------------------------------------
         #                             Options
         #---------------------------------------------------------------------
@@ -528,8 +538,15 @@ class Command:
         #---------------------------------------------------------------------
         elif Response == "Cheats":
             Game_State.loop = False
+            Game_State.cheats(Player, self, Scene)
         #---------------------------------------------------------------------
         #                             Credits
         #---------------------------------------------------------------------
         elif Response == "Credits":
             Game_State.loop = False
+        #---------------------------------------------------------------------
+        #                              Quit
+        #---------------------------------------------------------------------
+        elif Response == "Quit":
+            Game_State.loop = False
+            Game_State.quit(Player, self, Scene)

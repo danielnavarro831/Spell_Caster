@@ -125,8 +125,7 @@ class Room(Interactable):
                 for a in range(len(self.Interactables)):
                     if "Chest" in self.Interactables[a].Name:
                         treasure = True
-                if self.Interactables[0].Solved == False:
-                    print(Scene.print_message(self.Description, False, "Room", {}))
+                print(Scene.print_message(self.Description, False, "Room", {}))
                 if treasure == True:
                     print(Scene.print_message(14, False, "Room", {}))
                 Controller.get_command(Player, self, Game_State, Scene)
@@ -645,6 +644,13 @@ class Room(Interactable):
         Player.add_item_to_inventory(Treasure, Amount)
         #{Name} acquired {Amount} {Item}
         print(Scene.print_message(26, False, "Menu", {"{Name}":Player.Name["Value"], "{Amount}": Amount, "{Item}":Treasure}))
+
+    def add_interactable(self, Name, Solved, KeyName, Value, Commands, Type):
+        thing = Interactable(Name)
+        thing.Solved = Solved
+        thing.Commands = Commands
+        thing.Keys = [{"Name": KeyName, "Value": Value, "Type": Type, "Terms": Commands}]
+        self.Interactables.append(thing)
 #------------------------------------------------------------------------------------------------------------------------------------------
 #                                                                DUNGEON CLASS
 #------------------------------------------------------------------------------------------------------------------------------------------

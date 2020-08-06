@@ -195,6 +195,7 @@ class Game:
                 break
 
     def main_menu(self, Player, Controller, Scene):
+        self.menu = True
         print("-----------------------------------------------------------------------------------------------------------------------")
         print("                                                  Spell Caster                                                Ver.1.00 ")
         print("-----------------------------------------------------------------------------------------------------------------------")
@@ -202,118 +203,171 @@ class Game:
         print(" * About")
         print(" * New Game")
         file = Files()
-        if file.Continue == True:
+        if file.Continue() == True:
             print(" * Continue")
         print(" * Options")
         print(" * Cheats")
         print(" * Credits")
+        print(" * Quit")
         self.loop = True
         while self.loop == True:
             Controller.get_command(Player, file, self, Scene)
         file.__delete__()
 
     def start_game(self, Player, Controller, Scene):
-        Game_State.menu = False
         #Intro
         print("-----------------------------------------------------------------------------------------------------------------------")
         print("                                                    New Game")
         print("-----------------------------------------------------------------------------------------------------------------------")
         if Game_State.Debug == False:
-            Narrator.get_names(player, Controller)
-            Narrator.Intro_Grandfather(player, Controller, Narrator, Game_State)
-            Narrator.Intro_Friend(player, Controller)
-            Narrator.Intro_Agatha(player, Controller, Narrator, Game_State)
-            Narrator.defeated_by_Agatha(player)
-            Narrator.spellbook_tutorial(player, Controller, Game_State)
+            Scene.get_names(Player, Controller)
+            Scene.Intro_Grandfather(Player, Controller, Scene, self)
+            Scene.Intro_Friend(Player, Controller)
+            Scene.Intro_Agatha(Player, Controller, Scene, self)
+            Scene.defeated_by_Agatha(Player)
+            Scene.spellbook_tutorial(Player, Controller, self)
         #Enter Tower
-        Game_State.current_floor = ground_floor.Name
-        ground_floor.enter_room(player, Narrator, Controller, Game_State)
+        self.current_floor = self.tower[5].Name
+        self.tower[5].enter_room(Player, Scene, Controller, self)
 
-    def about(self, Controller, Scene):
-        pass
+    def about(self, Player, Controller, Scene):
+        print("-----------------------------------------------------------------------------------------------------------------------")
+        print("                                               About Spell Caster")
+        print("-----------------------------------------------------------------------------------------------------------------------")
 
-    def options(self, Controller, Scene, File):
-        pass
+    def options(self, Player, Controller, Scene, File):
+        print("-----------------------------------------------------------------------------------------------------------------------")
+        print("                                                    Options")
+        print("-----------------------------------------------------------------------------------------------------------------------")
+        #If save exists:
+            #Change Names
+            #Delete Save
+        #Set shortcut keys?
+            #1 = Fire
+            #2 = Attack
+            #etc...
 
-    def cheats(self, Player, Controller, Scene, File):
-        pass
+    def cheats(self, Player, Controller, Scene):
+        print("-----------------------------------------------------------------------------------------------------------------------")
+        print("                                                     Cheats")
+        print("-----------------------------------------------------------------------------------------------------------------------")
+        print(Scene.print_message(65, False, "Menu", {}))
+        print(Scene.print_header(Scene.make_line(89, "Menu", {})))
+        loop = True
+        while loop == True:
+            response = Controller.get_response(Player, False)
+            if response == Controller.Cheat:
+                loop = False
+                self.Debug = True
+                print(" * Debug Mode Enabled!")
+                self.main_menu(Player, Controller, Scene)
+            elif Controller.bools["Exit"] == True:
+                loop = False
+                self.main_menu(Player, Controller, Scene)
 
-    def credits(self, Controller, Scene):
-        pass
-#----------------------------------------------------------------------------------------------------------------------------------------
-#                                                          Init Classes
-#----------------------------------------------------------------------------------------------------------------------------------------
-Game_State = Game()
-player = Player(1, "Daniel")
-Controller = Command(player)
-Narrator = Scene(player)
+    def credits(self, Player, Controller, Scene):
+        print("-----------------------------------------------------------------------------------------------------------------------")
+        print("                                                     Credits")
+        print("-----------------------------------------------------------------------------------------------------------------------")
 
-#----------------------------------------------------------------------------------------------------------------------------------------
-#                                                          Init Rooms
-#----------------------------------------------------------------------------------------------------------------------------------------
-#Ground Floor
-ground_floor_candle = Interactable(["Candle", "Fire"])
-ground_floor_candle.Commands = ["Fire", "Burn", "Light"]
-ground_floor_candle.Keys = [{"Name": "Fire", "Value": False, "Type": "Spell", "Terms": ground_floor_candle.Commands}]
-ground_floor = Room("Tower Entrance", 5, [ground_floor_candle])
-ground_floor.Solved = True
-ground_floor.Floor = 0
+    def quit(self, Player, Controller, Scene):
+        print("-----------------------------------------------------------------------------------------------------------------------")
+        print("                                                   Quit Game")
+        print("-----------------------------------------------------------------------------------------------------------------------")
+        loop = True
+        while loop == True:
+            #Are you Sure you want to quit?
+            print(Scene.print_message(87, False, "Menu", {}))
+            response = Controller.get_response(Player, False)
+            if Controller.bools["Yes"] == True:
+                loop = False
+                if self.menu == False:
+                    #Return to main menu?
+                    loop = True
+                    while loop == True:
+                        print(Scene.print_message(88, False, "Menu", {}))
+                        response = Controller.get_response(Player, False)
+                        if Controller.bools["Yes"] == True:
+                            loop = False
+                            self.initialize()
+                        elif Controller.bools["No"] == True:
+                            loop = False
+            elif Controller.bools["No"] == True:
+                loop = False
+                if self.menu == True:
+                    self.initialize()
 
-#Tower 1
-Ice = Interactable(["Ice", "Door", "Fire"])
-Ice.Commands = ["Fire", "Melt", "Burn"]
-Ice.Keys = [{"Name": "Fire", "Value": False, "Type": "Spell", "Terms": Ice.Commands}]
-tower1 = Room("Cold Room", 8, [Ice])
-tower1.Floor = 1
+    def initialize(self):
+        player = Player(1, "Magicko")
+        Controller = Command(player)
+        Narrator = Scene(player)
+        #----------------------------------------------------------------------------------------------------------------------------------------
+        #                                                          Init Rooms
+        #----------------------------------------------------------------------------------------------------------------------------------------
+        #Ground Floor
+        ground_floor_candle = Interactable(["Candle", "Fire"])
+        ground_floor_candle.Commands = ["Fire", "Burn", "Light"]
+        ground_floor_candle.Keys = [{"Name": "Fire", "Value": False, "Type": "Spell", "Terms": ground_floor_candle.Commands}]
+        ground_floor = Room("Tower Entrance", 5, [ground_floor_candle])
+        ground_floor.Solved = True
+        ground_floor.Floor = 0
 
-#Tower 2
-Cauldron = Interactable(["Cauldron", "Water"])
-Cauldron.Commands = ["Pour", "Water", "Fill"]
-Cauldron.Keys = [{"Name": "Water", "Value": False, "Type": "Spell", "Terms": Cauldron.Commands}]
-tower2 = Room("Cauldron Room", 15, [Cauldron])
-tower2.Floor = 2
+        #Tower 1
+        Ice = Interactable(["Ice", "Door", "Fire"])
+        Ice.Commands = ["Fire", "Melt", "Burn"]
+        Ice.Keys = [{"Name": "Fire", "Value": False, "Type": "Spell", "Terms": Ice.Commands}]
+        tower1 = Room("Cold Room", 8, [Ice])
+        tower1.Floor = 1
 
-#Tower 3
-poison = Interactable(["Poison", "Gas", "Wind", "Air"])
-poison.Commands = ["Wind", "Blow", "Clear"]
-poison.Keys = [{"Name": "Wind", "Value": False, "Type": "Spell", "Terms": poison.Commands}]
-torch = Interactable(["Torch", "Fire"])
-torch.Commands = ["Fire", "Light", "Burn", "Melt"]
-torch.Keys = [{"Name": "Fire", "Value": False, "Type": "Spell", "Terms": torch.Commands}]
-tower3 = Room("Death Room", 26, [poison, torch])
-tower3.Floor = 3
+        #Tower 2
+        Cauldron = Interactable(["Cauldron", "Water"])
+        Cauldron.Commands = ["Pour", "Water", "Fill"]
+        Cauldron.Keys = [{"Name": "Water", "Value": False, "Type": "Spell", "Terms": Cauldron.Commands}]
+        tower2 = Room("Cauldron Room", 15, [Cauldron])
+        tower2.Floor = 2
 
-#Tower 4
-circuit_board = Interactable(["Circuit Board", "Lightning", "Board", "Circuits"])
-circuit_board.Commands = ["Lightning", "Shock", "Electricute", "Jump Start", "Kick Start", "Bolt", "Jolt"]
-circuit_board.Keys = [{"Name": "Lightning", "Value": False, "Type": "Spell", "Terms": circuit_board.Commands}]
-tower4 = Room("Generator Room", 31, [circuit_board])
-tower4.Floor = 4
+        #Tower 3
+        poison = Interactable(["Poison", "Gas", "Wind", "Air"])
+        poison.Commands = ["Wind", "Blow", "Clear"]
+        poison.Keys = [{"Name": "Wind", "Value": False, "Type": "Spell", "Terms": poison.Commands}]
+        torch = Interactable(["Torch", "Fire"])
+        torch.Commands = ["Fire", "Light", "Burn", "Melt"]
+        torch.Keys = [{"Name": "Fire", "Value": False, "Type": "Spell", "Terms": torch.Commands}]
+        tower3 = Room("Death Room", 26, [poison, torch])
+        tower3.Floor = 3
 
-#Tower 5
-tower5 = Room("Top of the Tower", 40, [])
-tower5.Floor = 5
+        #Tower 4
+        circuit_board = Interactable(["Circuit Board", "Lightning", "Board", "Circuits"])
+        circuit_board.Commands = ["Lightning", "Shock", "Electricute", "Jump Start", "Kick Start", "Bolt", "Jolt"]
+        circuit_board.Keys = [{"Name": "Lightning", "Value": False, "Type": "Spell", "Terms": circuit_board.Commands}]
+        tower4 = Room("Generator Room", 31, [circuit_board])
+        tower4.Floor = 4
 
-#Dungeon 1
-dungeon1 = Dungeon("Fire Dungeon", 7,  [], 1, ["Fire", "Normal"], 5)
+        #Tower 5
+        tower5 = Room("Top of the Tower", 40, [])
+        tower5.Floor = 5
 
-#Dungeon 2
-dungeon2 = Dungeon("Ice Dungeon", 41, [], 2, ["Ice", "Normal"], 6)
+        #Dungeon 1
+        dungeon1 = Dungeon("Fire Dungeon", 7,  [], 1, ["Fire", "Normal"], 5)
 
-#Dungeon 3
-dungeon3 = Dungeon("Water Dungeon", 42, [], 3, ["Water", "Normal"], 7)
+        #Dungeon 2
+        dungeon2 = Dungeon("Ice Dungeon", 41, [], 2, ["Ice", "Normal"], 6)
 
-#Dungeon 4
-dungeon4 = Dungeon("Wind Dungeon", 43, [], 4, ["Wind", "Normal"], 8)
+        #Dungeon 3
+        dungeon3 = Dungeon("Water Dungeon", 42, [], 3, ["Water", "Normal"], 7)
 
-#Dungeon 5
-dungeon5 = Dungeon("Lightning Dungeon", 44, [], 5, ["Lightning", "Normal"], 9)
+        #Dungeon 4
+        dungeon4 = Dungeon("Wind Dungeon", 43, [], 4, ["Wind", "Normal"], 8)
 
-Game_State.tower = [dungeon5, dungeon4, dungeon3, dungeon2, dungeon1, 
-             ground_floor, 
-             tower1, tower2, tower3, tower4, tower5]
+        #Dungeon 5
+        dungeon5 = Dungeon("Lightning Dungeon", 44, [], 5, ["Lightning", "Normal"], 9)
 
+        self.tower = [dungeon5, dungeon4, dungeon3, dungeon2, dungeon1, 
+                    ground_floor, 
+                    tower1, tower2, tower3, tower4, tower5]
+        self.main_menu(player, Controller, Narrator)
 #---------------------------------------------------------------------------------------------------------------------------------------
 #                                                           Game Path
 #---------------------------------------------------------------------------------------------------------------------------------------
-Game_State.main_menu(player, Controller, Narrator)
+Game_State = Game()
+Game_State.initialize()
