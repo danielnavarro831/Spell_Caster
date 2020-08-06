@@ -227,7 +227,7 @@ class Spell:
                         response = Controller.get_response(Player, False)
                         response = response.title()
                         if response == stats[0]: #Strength
-                            Player.Stats[stat]["Value"] += 1
+                            Player.Stats[stat]["Value"] += 5
                             Scene.print_message(29, True, "Menu", {"{Spell}": Player.Stats[stat]["Name"]})
                             loop = False
                         if response == stats[1]: #Duration

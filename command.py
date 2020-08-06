@@ -10,8 +10,8 @@ class Command:
         self.attack_spells = [Player.Fire["Name"], Player.Ice["Name"], Player.Lightning["Name"], Player.Water["Name"], Player.Wind["Name"], Player.Drain["Name"]]
         self.duration_spells = [Player.Curse["Name"], Player.Sand["Name"], Player.Regen["Name"], Player.Protect["Name"], Player.Shell["Name"]]
         self.items = Player.Inventory
-        self.yes = ["Yes", "Yup", "Yeah", "Ye", "Correct", "Y", "Sure"]
-        self.no = ["No", "Nope", "Nah", "Negative", "Incorrect", "N"]
+        self.yes = ["Yes", "Yup", "Yeah", "Ye", "Correct", "Y", "Sure", "Always", "Ok", "Fine"]
+        self.no = ["No", "Nope", "Nah", "Negative", "Incorrect", "N", "Never", "Pass"]
         self.attack = ["Attack", "Hit", "Damage", "Kill", "Hurt", "Smack", "Slap", "Strike", "Whack", "Bludgeon", "Fight"]
         self.exit = ["Back", "Exit", "Return", "Cancel", "Leave"]
         self.up = ["Up", "Ascend"]
@@ -23,6 +23,7 @@ class Command:
         self.spellbook = ["Magic", "Spells", "Spell", "Spellbook"]
         self.help = ["Help", "Commands", "Terms", "Glossary", "Words"]
         self.status = ["Status", "Stats", "Self", "Scan"]
+        self.save = ["Save"]
         self.Cheat = "Pumpkin Eater"
         self.bools = {"Yes": False, "No": False, "Attack": False, "Exit": False, "Up": False, "Down": False,  
                       "Resume": False, "Inventory": False, "Examine": False, "Spellbook": False, "Help": False, 
@@ -144,7 +145,8 @@ class Command:
         return text
 
     def get_command(self, Player, Obj, Game_State, Scene): #self, Class, Class, Class, Class
-        print(Scene.print_message(5, False, "Menu", {})) #What will you do?
+        if Game_State.menu == False:
+            print(Scene.print_message(5, False, "Menu", {})) #What will you do?
         response = input(" >")
         char = ""
         #strip
@@ -179,6 +181,8 @@ class Command:
                 self.translate_room_command(response, Player, Obj, Game_State, Scene)
         elif type(Obj) is Interactable:
             self.translate_interactable_command(response, Player, Obj, Game_State, Scene)
+        elif type(Obj) is Files:
+            self.translate_main_menu_command(response, Player, Obj, Game_State, Scene)
         else:
             print(Scene.print_message(40, False, "Menu", {}))
 
@@ -188,11 +192,19 @@ class Command:
             commands = ["Attack", "Inventory", "Spellbook"]
         else:
             if Game_State.in_dungeon == False:
-                commands = ["Examine", "Spellbook", "Inventory", "Go Up", "Go Down", "Stats"]
+                commands = ["Examine", "Spellbook", "Inventory", "Stats", "Recipes"]
                 if len(Game_State.get_room_commands()) > 0:
                     commands += Game_State.get_room_commands()
+                if Game_State.check_solved == True:
+                    comands += ["Go Up"]
+                commands += ["Go Down"]
             else:
-                commands = ["Fight", "Spellbook", "Inventory", "Go Up", "Go Down", "Stats"]
+                commands = ["Fight", "Spellbook", "Inventory", "Stats", "Recipes"]
+                if Game_State.check_room_steps() == False:
+                    commands += ["Continue"]
+                else:
+                    commands += ["Go Down"]
+                commands += ["Go Up"]
                 if len(Game_State.get_room_commands()) > 0:
                     commands += Game_State.get_room_commands()
         for command in range(len(commands)):
@@ -409,6 +421,8 @@ class Command:
             if Room.Steps_Taken >= Room.Steps: 
                 #Continue Fighting
                 Room.start_battle(Player, Scene, self, Game_State)
+            else:
+                Room.Loop = False
         #---------------------------------------------------------------------
         #                   Continue Walking Through Dungeon
         #---------------------------------------------------------------------
@@ -416,6 +430,14 @@ class Command:
             #Take next step in dungeon
             if Room.Steps_Taken < Room.Steps:
                 Room.Loop = False
+        #---------------------------------------------------------------------
+        #                               Save
+        #---------------------------------------------------------------------
+        elif response in self.save:
+            print(Scene.print_message(86, False, "Menu", {}))
+            save = Files()
+            save.save(Player, Game_State, Scene)
+            save.__delete__()
         #---------------------------------------------------------------------
         #                               Debug
         #---------------------------------------------------------------------
@@ -433,6 +455,14 @@ class Command:
             print(" * Debug: HP Depleted")
         elif response == "Level" and Game_State.Debug == True:
             self.levelup(Player, Scene)
+        elif response == "Ten" and Game_State.Debug == True:
+            counter = 0
+            while counter < 10:
+                self.levelup(Player, Scene)
+                counter += 1
+        elif response == "Textbook" and Game_State.Debug == True:
+            Player.Upgrades["Value"] += 10
+            print(" * Debug: Upgrades available")
         elif response == "Know It All" and Game_State.Debug == True:
             self.learn_all_spells(Player)
             print(" * Debug: Spells Learned")
@@ -466,3 +496,40 @@ class Command:
         else:
             if self.bools["Examine"] == True:
                 print(Scene.get_interactable_string(Interactable, "Examine", Player))
+#---------------------------------------------------------------------------------------------------------------------------------------
+#                                                                Main Menu Commands
+#---------------------------------------------------------------------------------------------------------------------------------------
+    def translate_main_menu_command(self, Response, Player, File, Game_State, Scene):
+        Response = Response.title()
+        #---------------------------------------------------------------------
+        #                             About
+        #---------------------------------------------------------------------
+        if Response == "About":
+            Game_State.loop = False
+        #---------------------------------------------------------------------
+        #                            New Game
+        #---------------------------------------------------------------------
+        elif Response == "New Game":
+            Game_State.loop = False
+            Game_State.start_game(Player, self, Scene)
+        #---------------------------------------------------------------------
+        #                             Continue
+        #---------------------------------------------------------------------
+        elif Response == "Continue" and File.Continue == True:
+            Game_State.loop = False
+            File.load(Player, Game_State, Scene)
+        #---------------------------------------------------------------------
+        #                             Options
+        #---------------------------------------------------------------------
+        elif Response == "Options":
+            Game_State.loop = False
+        #---------------------------------------------------------------------
+        #                             Cheats
+        #---------------------------------------------------------------------
+        elif Response == "Cheats":
+            Game_State.loop = False
+        #---------------------------------------------------------------------
+        #                             Credits
+        #---------------------------------------------------------------------
+        elif Response == "Credits":
+            Game_State.loop = False

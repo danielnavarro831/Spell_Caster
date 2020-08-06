@@ -25,11 +25,11 @@ class Actor:
         self.Wind = {"Name": "Wind", "Value": 0, "Casts": 0, "Init": 2}
         self.Cure = {"Name": "Cure", "Value": 0, "Casts": 0, "Init": 2} #Heals caster's HP by ({Value} * Magic) /2
         self.Drain = {"Name": "Drain", "Value": 0, "Casts": 0, "Init": 2} #Heals caster's HP by stealing {Value} * Magic amount from enemy
-        self.Curse = {"Name": "Curse", "Value": 0, "Duration": 0, "Max": 0, "Active": False, "Offering": False, "Casts": 0, "Init": 2} #Caster steals {Value}% of enemy's MaxHP for {Max} turns
-        self.Sand = {"Name": "Sandstorm", "Value": 0, "Duration": 0, "Max": 0, "Active": False, "Casts": 0, "Init": 2} #Lowers enemy accuracy for {Max} number of turns
-        self.Regen = {"Name": "Regen", "Value": 0, "Duration": 0, "Max": 0, "Active": False, "Casts": 0, "Init": 2} #Caster regains {Value}% of caster's MaxHP for {Max} turns
-        self.Protect = {"Name": "Protect", "Value" : 0, "Duration": 0, "Max": 0, "Active": False, "Casts": 0, "Init": 2} #Reduces incoming physical attacks by {Value}% for {Max} turns
-        self.Shell = {"Name": "Shell", "Value": 0, "Duration": 0, "Max": 0, "Active": False, "Casts": 0, "Init": 2} #Reduces incoming magical attacks by {Value}% for {Max} turns
+        self.Curse = {"Name": "Curse", "Value": 0, "Duration": 0, "Max": 0, "Active": False, "Offering": False, "Casts": 0, "Init": 5} #Caster steals {Value}% of enemy's MaxHP for {Max} turns
+        self.Sand = {"Name": "Sandstorm", "Value": 0, "Duration": 0, "Max": 0, "Active": False, "Casts": 0, "Init": 5} #Lowers enemy accuracy for {Max} number of turns
+        self.Regen = {"Name": "Regen", "Value": 0, "Duration": 0, "Max": 0, "Active": False, "Casts": 0, "Init": 5} #Caster regains {Value}% of caster's MaxHP for {Max} turns
+        self.Protect = {"Name": "Protect", "Value" : 0, "Duration": 0, "Max": 0, "Active": False, "Casts": 0, "Init": 5} #Reduces incoming physical attacks by {Value}% for {Max} turns
+        self.Shell = {"Name": "Shell", "Value": 0, "Duration": 0, "Max": 0, "Active": False, "Casts": 0, "Init": 5} #Reduces incoming magical attacks by {Value}% for {Max} turns
         self.Sacrifice = {"Name": "Sacrifice", "Value": 0}
         self.Hits = {"Name": "Hits", "Value": 0}
         self.MHits = {"Name": "MHits", "Value": 0}
@@ -318,6 +318,7 @@ class Player(Actor):
         self.XP["Max"] = self.Level["Value"] * (self.Level["Value"] * 100)
         self.Speakers = {"Grandfather": "Merlin", "Friend": "Morty", "Agatha": "Agatha"} #Used to store customized names (Grandfather, Best Friend, etc.)
         self.Upgrades = {"Name": "Chapter", "Value": 0}
+        self.Hidden_Stats = [self.Sacrifice, self.Hits, self.MHits, self.Upgrades]
         self.Recipes = []
 
     def level_up(self, Scene): #self, Class
@@ -359,6 +360,7 @@ class Player(Actor):
             if spell_book.Check_Condition(self, cond_list[a]) == True:
                 spells.append(cond_list[a])
         if self.Upgrades["Value"] > 0:
+            print(Scene.print_message(44, False, "Menu", {"{Amount}":self.Upgrades["Value"]}))
             print(Scene.print_message(48, False, "Menu", {}))
             for spell in range(len(spells)):
                 message = ""
@@ -849,7 +851,6 @@ class Enemy(Actor):
                             loop = False
                     else:
                         loop = False
-        print("AI Chose: " + str(options[choices]))
         return options[choices]
 
     def AI_attack(self, type, Enemy, Game_State, Scene): #self, "type", Class, Class, Class

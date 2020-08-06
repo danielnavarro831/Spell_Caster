@@ -1,6 +1,7 @@
 import xlrd
 import random
 from files import Files
+from actor import *
 
 class Scene():
     def __init__(self, Player): #self, Class
@@ -196,7 +197,7 @@ class Scene():
         #Get Friend's Name
         Controller.get_speaker_name(Player, "Friend", self, [14, 8, 9])
 
-    def Intro_Grandfather(self, Player, Controller): #self, Class, Class
+    def Intro_Grandfather(self, Player, Controller, Scene, Game_State): #self, Class, Class
         loop = True
         no = 0
         while loop == True:
@@ -277,6 +278,10 @@ class Scene():
         print(self.print_message(41, False, "Story", {"{Name}": Player.Speakers["Grandfather"]}))
         self.print_message(42, True, "Story", {})
         self.print_message(6, True, "Story", {})
+        dummy = Actor(1, "Magical Dummy")
+        dummy.XP["Value"] = 100
+        Game_State.start_battle(Player, dummy, Controller, Scene)
+        Player.rest()
 
     def Intro_Friend(self, Player, Controller): #self, Class, Class
         #"Excellent! Keep this up and you'll be a master wizard in no time!"
@@ -308,7 +313,7 @@ class Scene():
         print(self.print_message(59, False, "Story", {}))
         self.print_message(60, True, "Story", {})
 
-    def Intro_Agatha(self, Player, Controller): #self, Class, Class
+    def Intro_Agatha(self, Player, Controller, Scene, Game_State): #self, Class, Class
         print(self.print_message(64, False, "Story", {"{Name}": Player.Speakers["Friend"]}))
         print(self.print_message(65, False, "Story", {}))
         self.print_message(66, True, "Story", {})
@@ -332,6 +337,13 @@ class Scene():
         self.print_message(81, True, "Story", {"{Name}": Player.Speakers["Agatha"].upper()})
         self.print_message([82, 83, 84], True, "Story", [{}, {"{Name}": Player.Speakers["Agatha"]}, {}])
         self.print_message(109, True, "Story", {"{Name}": Player.Name["Value"]})
+        agatha = Enemy(10, "Agatha", "", ["Fire", "Ice", "Water", "Wind", "Lightning"], [])
+        agatha.make_boss()
+        agatha.Name["Value"] = Player.Speakers["Agatha"]
+        Game_State.can_lose = True
+        Game_State.start_battle(Player, agatha, Controller, Scene)
+        Game_State.can_lose = False
+        agatha.__delete__()
 
     def defeated_by_Agatha(self, Player): #self, Class
         self.print_message(110, True, "Story", {})
@@ -358,3 +370,52 @@ class Scene():
                 Game_State.tutorial = False
         self.print_message([51, 52, 53, 54], True, "Menu", [])
         self.print_message([99, 100, 101, 102], True, "Story", [{}, {"{Name}": Player.Speakers["Agatha"]}, {}, {"{Name}": Player.Speakers["Friend"]}])
+
+    def Top_of_Tower_pre_battle(self, Player, Controller, Game_State):
+        self.print_message([*range(125, 140)], True, "Story", 
+                           [{"{Agatha}": Player.Speakers["Agatha"], "{Name}": Player.Name["Value"]}, {},{}, {},
+                            {"{Name}": Player.Speakers["Agatha"]}, {}, {"{Agatha}": Player.Speakers["Agatha"]},
+                            {"{Name}": Player.Name["Value"]}, {}, {"{Name}": Player.Name["Value"]},
+                            {"{Merlin}": Player.Speakers["Grandfather"]}, {}, {}, {"{Merlin}": Player.Speakers["Grandfather"]},
+                            {"{Name}": Player.Name["Value"]}])
+        loop = True
+        Path = ""
+        while loop == True:
+            response = Controller.get_response(Player, True)
+            if Controller.bools["No"] == True:
+                Path = "Good"
+                self.print_message(140, True, "Story", {})
+                #Fight Agatha
+                agatha = Enemy(10, "Agatha", "", ["Fire", "Ice", "Water", "Wind", "Lightning"], [])
+                agatha.make_boss()
+                agatha.Name["Value"] = Player.Speakers["Agatha"]
+                Game_State.start_battle(Player, agatha, Controller, self)
+                if Game_State.game_over == False:
+                    self.Top_of_Tower_post_battle(Player, Controller, Game_State, Path)
+                loop = False
+            elif Controller.bools["Yes"] == True:
+                Path = "Evil"
+                self.print_message([*range(141, 150)], True, "Story", [{}, {"{Merlin}": Player.Speakers["Grandfather"]},
+                                                                                             {"{Agatha}": Player.Speakers["Agatha"]}, {"{Merlin}": Player.Speakers["Grandfather"]},
+                                                                                             {}, {"{Agatha}": Player.Speakers["Agatha"]}, {}, {}, {}])
+                #Fight Merlin
+                merlin = Enemy(10, "Merlin", "", ["Fire", "Ice", "Water", "Wind", "Lightning"], [])
+                merlin.make_boss()
+                merlin.Name["Value"] = Player.Speakers["Grandfather"]
+                Game_State.start_battle(Player, merlin, Controller, self)
+                if Game_State.game_over == False:
+                    self.Top_of_Tower_post_battle(Player, Controller, Game_State, Path)
+                loop = False
+            else:
+                print(self.print_message(139, False, "Story", {"{Name}": Player.Name["Value"]}))
+
+    def Top_of_Tower_post_battle(self, Player, Controller, Game_State, Path):
+        if Path == "Good":
+            self.print_message([*range(160, 179)], True, "Story", [{}, {"{Name}": Player.Name["Value"]}, {"{Agatha}": Player.Speakers["Agatha"]}, {"{Name}": Player.Name["Value"]},
+                                                                   {}, {}, {"{Merlin}": Player.Speakers["Grandfather"], "{Friend}": Player.Speakers["Friend"]}, {}, {"{Merlin}": Player.Speakers["Grandfather"], "{Friend}": Player.Speakers["Friend"]},
+                                                                   {"{Friend}": Player.Speakers["Friend"]}, {"{Friend}": Player.Speakers["Friend"]}, {}, {}, {}, {"{Merlin}": Player.Speakers["Grandfather"]}, {}, 
+                                                                   {"{Name}": Player.Name["Value"]}, {"{Name}": Player.Name["Value"]}, {"{Friend}": Player.Speakers["Friend"]}])
+        else:
+            self.print_message([*range(150, 160)], True, "Story", [{"{Name}": Player.Name["Value"]}, {}, {"{Agatha}": Player.Speakers["Agatha"], "{Merlin}": Player.Speakers["Grandfather"]},
+                                                                   {}, {"{Merlin}": Player.Speakers["Grandfather"]}, {}, {"{Name}": Player.Name["Value"]}, {"{Name}": Player.Speakers["Friend"]}, {"{Agatha}": Player.Speakers["Agatha"]}, {}])
+        self.print_message(179, True, "Story", {})

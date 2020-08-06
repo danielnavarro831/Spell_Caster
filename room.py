@@ -215,9 +215,9 @@ class Room(Interactable):
                     Controller.get_command(Player, self, Game_State, Scene)
                     if "Water" in self.Interactables[0].Keys[0]["Name"]:
                         if self.Interactables[0].Solved == True:
-                            self.Interactables[0].Name = ["Cauldron", "Goblin Toe", "Toe"]
+                            self.Interactables[0].Name = ["Cauldron", "Dragon Scale", "Scale"]
                             self.Interactables[0].Solved = False
-                            self.Interactables[0].Keys = [{"Name": "Goblin Toe", "Value": False, "Type": "Item", "Terms":["Add", "Put", "Drop"]}]
+                            self.Interactables[0].Keys = [{"Name": "Dragon Scale", "Value": False, "Type": "Item", "Terms":["Add", "Put", "Drop"]}]
                             self.Interactables[0].Commands = self.Interactables[0].Keys[0]["Terms"]
                             self.Description += 1
                             self.Counter += 1
@@ -226,11 +226,11 @@ class Room(Interactable):
                             if hint_trigger >= 3:
                                 print(Scene.print_message(116, False, "Story", {}))
                                 hint_trigger = 0
-                    elif "Goblin Toe" in self.Interactables[0].Keys[0]["Name"]:
+                    elif "Dragon Scale" in self.Interactables[0].Keys[0]["Name"]:
                         if self.Interactables[0].Solved == True:
-                            self.Interactables[0].Name = ["Cauldron", "Ashes"]
+                            self.Interactables[0].Name = ["Cauldron", "Yetti Fur", "Fur"]
                             self.Interactables[0].Solved = False
-                            self.Interactables[0].Keys = [{"Name": "Ashes", "Value": False, "Type": "Item", "Terms":["Add", "Put", "Drop"]}]
+                            self.Interactables[0].Keys = [{"Name": "Yetti Fur", "Value": False, "Type": "Item", "Terms":["Add", "Put", "Drop"]}]
                             self.Interactables[0].Commands = self.Interactables[0].Keys[0]["Terms"]
                             self.Counter += 1
                         else:
@@ -238,7 +238,7 @@ class Room(Interactable):
                             if hint_trigger >= 3:
                                 print(Scene.print_message(117, False, "Story", {}))
                                 hint_trigger = 0
-                    elif "Ashes" in self.Interactables[0].Keys[0]["Name"]:
+                    elif "Yetti Fur" in self.Interactables[0].Keys[0]["Name"]:
                         if self.Interactables[0].Solved == True:
                             self.Interactables[0].Name = ["Cauldron", "Charred Finger", "Finger"]
                             self.Interactables[0].Solved = False
@@ -327,14 +327,21 @@ class Room(Interactable):
     def tower3(self, Player, Scene, Controller, Game_State): #self, Class, Class, Class
         loop = True
         treasure = False
+        poison = False
+        hint_trigger = 0
         while loop == True and Game_State.game_over == False:
             for a in range(len(self.Interactables)):
                 if "Chest" in self.Interactables[a].Name:
                     if self.Interactables[a].Solved == False:
                         treasure = True
+                elif "Poison" in self.Interactables[a].Name:
+                    if self.Interactables[a].Solved == False:
+                        poison = True
             if self.Solved == False:
                 if treasure == True:
                     print(Scene.print_message(14, False, "Room", {}))
+                if poison == True:
+                    print(Scene.print_message(39, False, "Room", {}))
                 print(Scene.print_message(self.Description, False, "Room", {}))
                 Controller.get_command(Player, self, Game_State, Scene)
                 remove = False
@@ -344,7 +351,9 @@ class Room(Interactable):
                     if "Poison" in self.Interactables[a].Name:
                         if self.Interactables[a].Solved == True:
                             remove = True
+                            hint_trigger = 0
                             pos = a
+                            poison = False
                         else:
                             amount = int(Player.HP["Max"] - (Player.HP["Max"] * (100 - 25)/100))
                             print(Scene.print_message(25, False, "Room", {"{Name}": Player.Name["Value"], "{Amount}":amount, "{HP}":Player.HP["Name"]}))
@@ -352,6 +361,11 @@ class Room(Interactable):
                             if Player.HP["Value"] <= 0:
                                 Game_State.game_over = True
                                 break
+                            else:
+                                hint_trigger += 1
+                                if hint_trigger >= 3:
+                                    print(Scene.print_message(122, False, "Story", {}))
+                                    hint_trigger = 0
                     elif "Torch" in self.Interactables[a].Name:
                         if self.Interactables[a].Solved == True:
                             self.Description += 1
@@ -375,12 +389,11 @@ class Room(Interactable):
                             pos = a
                     elif "Chest" in self.Interactables[a].Name:
                         if self.Interactables[a].Solved == True:
-                            if "Hi-Potion" not in Player.Recipes:
-                                Player.Recipes.append("Hi-Potion")
-                                print(Scene.print_message(80, False, "Menu", {"{Name}": Player.Name["Value"], "{Potion}": "Hi-Potion"}))
+                            Player.learn_recipe("Hi-Potion", Scene)
                             self.open_chest(Player, Scene, "Hi-Potion", 1)
                             remove = True
                             pos = a
+                            treasure = False
                     elif "Door" in self.Interactables[a].Name:
                         if self.Interactables[a].Solved == True:
                             self.Description += 1
@@ -390,6 +403,7 @@ class Room(Interactable):
                 if Game_State.game_over != True:
                     if remove == True:
                         del self.Interactables[pos]
+                        remove = False
                     if add == True:
                         if self.Counter == 1:
                             pit = Interactable(["Pit", "Hole", "Water"])
@@ -410,6 +424,7 @@ class Room(Interactable):
                             door.Commands = ["Fire", "Melt", "Burn"]
                             door.Keys = [{"Name": "Fire", "Value": False, "Type": "Spell", "Terms": door.Commands}]
                             self.Interactables.append(door)
+                        add = False
                 else:
                     #Game Over
                     print(Scene.print_message(1, False, "Menu",{}))
@@ -418,6 +433,8 @@ class Room(Interactable):
                 pos = a
                 if treasure == True:
                     print(Scene.print_message(14, False, "Room", {}))
+                if poison == True:
+                    print(Scene.print_message(39, False, "Room", {}))
                 print(Scene.print_message(13, False, "Room", {}))
                 Controller.get_command(Player, self, Game_State, Scene)
                 for a in range(len(self.Interactables)):
@@ -427,22 +444,200 @@ class Room(Interactable):
                             self.open_chest(Player, Scene, "Hi-Potion", 1)
                             remove = True
                             pos = a
+                            add = True
+                            treasure = False
+                    elif "Poison" in self.Interactables[a].Name:
+                        if self.Interactables[a].Solved == True:
+                            remove = True
+                            hint_trigger = 0
+                            pos = a
+                            poison = False
+                        else:
+                            amount = int(Player.HP["Max"] - (Player.HP["Max"] * (100 - 25)/100))
+                            print(Scene.print_message(25, False, "Room", {"{Name}": Player.Name["Value"], "{Amount}":amount, "{HP}":Player.HP["Name"]}))
+                            Player.HP["Value"] -= amount
+                            if Player.HP["Value"] <= 0:
+                                Game_State.game_over = True
+                                break
+                            else:
+                                hint_trigger += 1
+                                if hint_trigger >= 3:
+                                    print(Scene.print_message(122, False, "Story", {}))
+                                    hint_trigger = 0
                 if remove == True:
                     del self.Interactables[pos]
+                    remove = False
 
     def tower4(self, Player, Scene, Controller, Game_State): #self, Class, Class, Class
         loop = True
+        treasure = False
+        poison = False
+        hint_trigger = 0
         while loop == True and Game_State.game_over == False:
+            for a in range(len(self.Interactables)):
+                if "Chest" in self.Interactables[a].Name:
+                    if self.Interactables[a].Solved == False:
+                        treasure = True
+                elif "Poison" in self.Interactables[a].Name:
+                    if self.Interactables[a].Solved == False:
+                        poison = True
             if self.Solved == False:
+                remove = False
+                add = False
+                pos = 0
+                if treasure == True:
+                    print(Scene.print_message(14, False, "Room", {}))
+                if poison == True:
+                    print(Scene.print_message(39, False, "Room", {}))
+                print(Scene.print_message(self.Description, False, "Room", {}))
                 Controller.get_command(Player, self, Game_State, Scene)
+                for a in range(len(self.Interactables)):
+                    if "Circuit Board" in self.Interactables[a].Name:
+                        if self.Interactables[a].Solved == True:
+                            self.Description += 1
+                            print(Scene.print_message(self.Description, False, "Room", {}))
+                            self.Description +=1
+                            self.Counter += 1
+                            hint_trigger = 0
+                            remove = True
+                            pos = a
+                            add = True
+                        else:
+                            hint_trigger += 1
+                            if hint_trigger >= 3:
+                                print(Scene.print_message(123, False, "Story", {}))
+                                hint_trigger = 0
+                    elif "Torch" in self.Interactables[a].Name:
+                        if self.Interactables[a].Solved == True:
+                            self.Description += 1
+                            print(Scene.print_message(self.Description, False, "Room", {}))
+                            self.Description += 1
+                            self.Counter += 1
+                            remove = True
+                            pos = a
+                            add = True
+                    elif "Console" in self.Interactables[a].Name:
+                        if self.Interactables[a].Solved == True:
+                            self.Description += 1
+                            print(Scene.print_message(self.Description, False, "Room", {}))
+                            self.Description += 1
+                            self.Counter += 1
+                            remove = True
+                            pos = a
+                            add = True
+                            hint_trigger = 0
+                        else:
+                            hint_trigger += 1
+                            if hint_trigger >= 3:
+                                print(Scene.print_message(124, False, "Story", {}))
+                    elif "Chest" in self.Interactables[a].Name:
+                        if self.Interactables[a].Solved == True:
+                            Player.learn_recipe("Lightning Resistance", Scene)
+                            self.open_chest(Player, Scene, "Mega-Ether", 1)
+                            remove = True
+                            pos = a
+                            treasure = False
+                    elif "Poison" in self.Interactables[a].Name:
+                        if self.Interactables[a].Solved == True:
+                            remove = True
+                            hint_trigger = 0
+                            pos = a
+                            poison = False
+                        else:
+                            amount = int(Player.HP["Max"] - (Player.HP["Max"] * (100 - 25)/100))
+                            print(Scene.print_message(25, False, "Room", {"{Name}": Player.Name["Value"], "{Amount}":amount, "{HP}":Player.HP["Name"]}))
+                            Player.HP["Value"] -= amount
+                            if Player.HP["Value"] <= 0:
+                                Game_State.game_over = True
+                                break
+                            else:
+                                hint_trigger += 1
+                                if hint_trigger >= 3:
+                                    print(Scene.print_message(122, False, "Story", {}))
+                                    hint_trigger = 0
+                    elif "Fire" in self.Interactables[a].Name:
+                        if self.Interactables[a].Solved == True:
+                            self.Description += 1
+                            remove = True
+                            pos = a
+                            self.Solved = True
+                if Game_State.game_over != True:
+                    if remove == True:
+                        del self.Interactables[pos]
+                        remove = False
+                    if add == True:
+                        if self.Counter == 1:
+                            torch = Interactable(["Torch", "Fire"])
+                            torch.Commands = ["Fire", "Light", "Burn", "Melt"]
+                            torch.Keys = [{"Name": "Fire", "Value": False, "Type": "Spell", "Terms": torch.Commands}]
+                            self.Interactables.append(torch)
+                        elif self.Counter == 2:
+                            console = Interactable(["Console", "Energy Core"])
+                            console.Commands = ["Add", "Insert", "Power"]
+                            console.Keys = [{"Name": "Energy Core", "Value": False, "Type": "Item", "Terms": console.Commands}]
+                            self.Interactables.append(console)
+                        elif self.Counter == 3:
+                            gas = Interactable(["Poison", "Gas", "Wind", "Air", "Miasma"])
+                            gas.Commands = ["Wind", "Blow", "Clear"]
+                            gas.Keys = [{"Name": "Wind", "Value": False, "Type": "Spell", "Terms": gas.Commands}]
+                            self.Interactables.append(gas)
+                            chest = Interactable("Chest")
+                            chest.Commands = ["Open", "Unlock"]
+                            chest.Keys = [{"Name": "Key Card", "Value": False, "Type": "Item", "Terms": chest.Commands}]
+                            self.Interactables.append(chest)
+                            fire = Interactable(["Fire", "Wall", "Water"])
+                            fire.Commands = ["Water", "Extinguish", "Put Out"]
+                            fire.Keys = [{"Name": "Water", "Value": False, "Type": "Spell", "Terms": fire.Commands}]
+                            self.Interactables.append(fire)
+                        add = False
+                else:
+                    #Game Over
+                    print(Scene.print_message(1, False, "Menu",{}))
             else:
+                for a in range(len(self.Interactables)):
+                    if "Chest" in self.Interactables[a].Name:
+                        if self.Interactables[a].Solved == False:
+                            treasure = True
+                if treasure == True:
+                    print(Scene.print_message(14, False, "Room", {}))
+                print(Scene.print_message(self.Description, False, "Room", {}))
+                print(Scene.print_message(13, False, "Room", {}))
                 Controller.get_command(Player, self, Game_State, Scene)
+                for a in range(len(self.Interactables)):
+                    if "Chest" in self.Interactables[a].Name:
+                        if self.Interactables[a].Solved == True:
+                            Player.learn_recipe("Lightning Resistance", Scene)
+                            self.open_chest(Player, Scene, "Mega-Ether", 1)
+                            remove = True
+                            pos = a
+                            add = True
+                    elif "Poison" in self.Interactables[a].Name:
+                        if self.Interactables[a].Solved == True:
+                            remove = True
+                            hint_trigger = 0
+                            pos = a
+                            poison = False
+                        else:
+                            amount = int(Player.HP["Max"] - (Player.HP["Max"] * (100 - 25)/100))
+                            print(Scene.print_message(25, False, "Room", {"{Name}": Player.Name["Value"], "{Amount}":amount, "{HP}":Player.HP["Name"]}))
+                            Player.HP["Value"] -= amount
+                            if Player.HP["Value"] <= 0:
+                                Game_State.game_over = True
+                                break
+                            else:
+                                hint_trigger += 1
+                                if hint_trigger >= 3:
+                                    print(Scene.print_message(122, False, "Story", {}))
+                                    hint_trigger = 0
+                if remove == True:
+                    del self.Interactables[pos]
+                    remove = False
 
     def tower5(self, Player, Scene, Controller, Game_State): #self, Class, Class, Class
         loop = True
         while loop == True and Game_State.game_over == False:
             if self.Solved == False:
-                Controller.get_command(Player, self, Game_State, Scene)
+                Scene.Top_of_Tower_pre_battle(Player, Controller, Game_State)
             else:
                 Controller.get_command(Player, self, Game_State, Scene)
 
@@ -460,7 +655,6 @@ class Dungeon(Room):
         self.Type = type
         self.Steps = steps
         self.Steps_Taken = 0
-        self.Bosses = []
         self.Loop = False
 
     def enter_dungeon(self, Player, Scene, Controller, Game_State): #self, Class, Class, Class, Class
@@ -475,6 +669,8 @@ class Dungeon(Room):
                 print(Scene.print_message([2, 3, 12], False, "Room", [{"{Room}": self.Name}, {}, {}]))
                 self.Solved = True
             while self.Loop == True:
+                if self.Steps_Taken < self.Steps and Game_State.game_over == False:
+                    print(Scene.print_message(30, False, "Room", {}))
                 response = Controller.get_command(Player, self, Game_State, Scene)
     
     def start_battle(self, Player, Scene, Controller, Game_State): #self, Class, Class, Class, Class
