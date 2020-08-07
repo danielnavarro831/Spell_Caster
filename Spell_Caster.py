@@ -197,7 +197,7 @@ class Game:
     def main_menu(self, Player, Controller, Scene):
         self.menu = True
         print("-----------------------------------------------------------------------------------------------------------------------")
-        print("                                                  Spell Caster                                                Ver.1.00 ")
+        print("                                                  Spell Caster                                                Ver.1.01 ")
         print("-----------------------------------------------------------------------------------------------------------------------")
         print(Scene.print_header("Type Your Selection"))
         print(" * About")
