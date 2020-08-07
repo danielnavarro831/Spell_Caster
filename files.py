@@ -14,7 +14,7 @@ class Files:
         wb = load_workbook(self.save_path)
         sheets = wb.sheetnames
         GameState = wb[sheets[5]]
-        if GameState.cell(row = 5, column = 2).value == "TRUE":
+        if GameState.cell(row = 5, column = 2).value == True:
             return True
         else:
             return False
@@ -80,6 +80,7 @@ class Files:
                 text = Player.Recipes[b] + " Recipe"
                 Inventory.cell(row = counter, column = 1).value = text
                 Inventory.cell(row = counter, column = 2).value = 1
+                counter += 1
         #Save Rooms
         counter = 2
         counter_2 = 2
@@ -118,7 +119,7 @@ class Files:
         GameState.cell(row = 2, column = 2).value = Game_State.current_floor
         GameState.cell(row = 3, column = 2).value = Game_State.in_dungeon
         GameState.cell(row = 4, column = 2).value = Game_State.tutorial
-        GameState.cell(row = 5, column = 2).value = "TRUE"
+        GameState.cell(row = 5, column = 2).value = True
         wb.save(self.save_path) 
         print(Scene.print_message(85, False, "Menu", {}))
 
@@ -162,7 +163,12 @@ class Files:
         counter = 2
         while Inventory.cell(row = counter, column = 1).value:
             if Inventory.cell(row = counter, column = 2).value > 0:
-                Player.Inventory[Inventory.cell(row = counter, column = 1).value] = Inventory.cell(row = counter, column = 2).value
+                if "Recipe" not in Inventory.cell(row = counter, column = 1).value:
+                    Player.Inventory[Inventory.cell(row = counter, column = 1).value] = Inventory.cell(row = counter, column = 2).value
+                else:
+                    text = Inventory.cell(row = counter, column = 1).value
+                    text = text.split(" Recipe")
+                    Player.Recipes.append(text[0])
             counter += 1
         #Set Rooms
         for a in range(len(Game_State.tower)):
@@ -223,3 +229,112 @@ class Files:
         for a in range(len(Text_List)):
             Text_List[a] = Text_List[a].strip("'")
         return Text_List
+
+    def delete_save_data(self, Player, Controller, Scene):
+        #Confirmation Prompt
+        loop = True
+        confirmed = False
+        while loop == True:
+            #Are you sure?
+            print(Scene.print_message(96, False, "Menu", {}))
+            response = Controller.get_response(Player, False)
+            if Controller.bools["Yes"] == True:
+                confirmed = True
+                loop = False
+                print(Scene.print_message(94, False, "Menu", {}))
+            elif Controller.bools["No"] == True:
+                confirmed = False
+                loop = False
+        if confirmed == True:
+            wb = load_workbook(self.save_path)
+            sheets = wb.sheetnames
+            Speakers = wb[sheets[0]]
+            for row in Speakers['B2:B10']:
+              for cell in row:
+                cell.value = None
+            Stats = wb[sheets[1]]
+            for row in Stats['B2:D26']:
+              for cell in row:
+                cell.value = None
+            Inventory = wb[sheets[2]]
+            for row in Inventory['A2:B300']:
+              for cell in row:
+                cell.value = None
+            Rooms = wb[sheets[3]]
+            for row in Rooms['A2:E20']:
+              for cell in row:
+                cell.value = None
+            Interactables = wb[sheets[4]]
+            for row in Interactables['A2:G40']:
+              for cell in row:
+                cell.value = None
+            GameState = wb[sheets[5]]
+            for row in GameState['B2:B10']:
+              for cell in row:
+                cell.value = None
+            GameState.cell(row = 5, column = 2).value = False
+            wb.save(self.save_path) 
+            print(Scene.print_message(95, False, "Menu", {}))
+
+    def rename(self, Key, Name, Scene):
+        wb = load_workbook(self.save_path)
+        sheets = wb.sheetnames
+        Speakers = wb[sheets[0]]
+        counter = 1
+        while Speakers.cell(row = counter, column = 1).value != Key:
+            counter += 1
+            if Speakers.cell(row = counter, column = 1).value == Key:
+                Speakers.cell(row = counter, column = 2).value = Name
+        wb.save(self.save_path)
+        print(Scene.print_message(93, False, "Menu", {}))
+
+    def choose_rename(self, Player, Controller, Scene):
+        loop = True
+        choices = []
+        Key = ""
+        Rename = ""
+        #Choose Character to rename
+        while loop == True:
+            choices = ["Player"]
+            print(Scene.print_message(97, False, "Menu", {}))
+            print(" * Player")
+            for a in Player.Speakers.keys():
+                print(" * " + a)
+                choices.append(a)
+            response = Controller.get_response(Player, False)
+            response = response.title()
+            if response in choices:
+                loop = False
+                Key = response
+        #Choose new name
+        loop = True
+        while loop == True:
+            #What would you like to rename this character to?
+            print(Scene.print_message(98, False, "Menu", {}))
+            response = Controller.get_response(Player, False)
+            response = response.title()
+            if len(response) > 0 and len(response) < 17:
+                #Confirmation prompt
+                Rename = response
+                loop2 = True
+                while loop2 == True:
+                    #Rename {Key} to {Name}?
+                    print(Scene.print_message(99, False, "Menu", {"{Key}": Key, "{Name}": Rename}))
+                    response = Controller.get_response(Player, False)
+                    if Controller.bools["Yes"] == True:
+                        loop2 = False
+                        loop = False
+                        self.rename(Key, Rename, Scene)
+                    elif Controller.bools["No"] == True:
+                        loop2 = False
+            elif len(response) > 16:
+                print(Scene.print_message(100, False, "Menu", {}))
+            elif len(response) < 1:
+                print(Scene.print_message(101, False, "Menu", {}))
+
+    def fix(self, Page, Row, Column, Value):
+        wb = load_workbook(self.save_path)
+        sheets = wb.sheetnames
+        sheet = wb[sheets[Page]]
+        sheet.cell(row = Row, column = Column).value = Value
+        wb.save(self.save_path)

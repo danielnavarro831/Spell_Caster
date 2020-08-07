@@ -20,16 +20,16 @@ class Actor:
         self.Def = {"Name": "Defense", "Value": 4 + level} #Defense against enemy physical (non-magic) attacks
         self.Fire = {"Name": "Fire", "Value": 0, "Casts": 0, "Init": 2}
         self.Ice = {"Name": "Ice", "Value": 0, "Casts": 0, "Init": 2}
-        self.Lightning = {"Name": "Lightning", "Value": 0, "Casts": 0, "Init": 2}
-        self.Water = {"Name": "Water", "Value": 0, "Casts": 0, "Init": 2}
-        self.Wind = {"Name": "Wind", "Value": 0, "Casts": 0, "Init": 2}
-        self.Cure = {"Name": "Cure", "Value": 0, "Casts": 0, "Init": 2} #Heals caster's HP by ({Value} * Magic) /2
-        self.Drain = {"Name": "Drain", "Value": 0, "Casts": 0, "Init": 2} #Heals caster's HP by stealing {Value} * Magic amount from enemy
+        self.Lightning = {"Name": "Lightning", "Value": 0, "Casts": 0, "Init": 10}
+        self.Water = {"Name": "Water", "Value": 0, "Casts": 0, "Init": 5}
+        self.Wind = {"Name": "Wind", "Value": 0, "Casts": 0, "Init": 7}
+        self.Cure = {"Name": "Cure", "Value": 0, "Casts": 0, "Init": 10} #Heals caster's HP by ({Value} * Magic) /2
+        self.Drain = {"Name": "Drain", "Value": 0, "Casts": 0, "Init": 10} #Heals caster's HP by stealing {Value} * Magic amount from enemy
         self.Curse = {"Name": "Curse", "Value": 0, "Duration": 0, "Max": 0, "Active": False, "Offering": False, "Casts": 0, "Init": 5} #Caster steals {Value}% of enemy's MaxHP for {Max} turns
         self.Sand = {"Name": "Sandstorm", "Value": 0, "Duration": 0, "Max": 0, "Active": False, "Casts": 0, "Init": 5} #Lowers enemy accuracy for {Max} number of turns
-        self.Regen = {"Name": "Regen", "Value": 0, "Duration": 0, "Max": 0, "Active": False, "Casts": 0, "Init": 5} #Caster regains {Value}% of caster's MaxHP for {Max} turns
-        self.Protect = {"Name": "Protect", "Value" : 0, "Duration": 0, "Max": 0, "Active": False, "Casts": 0, "Init": 5} #Reduces incoming physical attacks by {Value}% for {Max} turns
-        self.Shell = {"Name": "Shell", "Value": 0, "Duration": 0, "Max": 0, "Active": False, "Casts": 0, "Init": 5} #Reduces incoming magical attacks by {Value}% for {Max} turns
+        self.Regen = {"Name": "Regen", "Value": 0, "Duration": 0, "Max": 0, "Active": False, "Casts": 0, "Init": 10} #Caster regains {Value}% of caster's MaxHP for {Max} turns
+        self.Protect = {"Name": "Protect", "Value" : 0, "Duration": 0, "Max": 0, "Active": False, "Casts": 0, "Init": 10} #Reduces incoming physical attacks by {Value}% for {Max} turns
+        self.Shell = {"Name": "Shell", "Value": 0, "Duration": 0, "Max": 0, "Active": False, "Casts": 0, "Init": 10} #Reduces incoming magical attacks by {Value}% for {Max} turns
         self.Sacrifice = {"Name": "Sacrifice", "Value": 0}
         self.Hits = {"Name": "Hits", "Value": 0}
         self.MHits = {"Name": "MHits", "Value": 0}
@@ -401,6 +401,7 @@ class Player(Actor):
                         else:
                             spell_book.learn_elem_spell(response, self, Scene)
                             loop = False
+                            self.Upgrades["Value"] -= 1
                     else:
                         #You can't study that!
                         print(Scene.print_message(32, False, "Menu", {}))
@@ -777,7 +778,7 @@ class Enemy(Actor):
         elif type == "Normal":
             if rando == 1:
                 self.Name["Value"] = "Golem"
-                self.Strength["Value"] += 20
+                self.Strength["Value"] += 16
                 self.Def["Value"] += 20
                 self.Magic["Value"] -=3
                 self.MDef["Value"] -= 3

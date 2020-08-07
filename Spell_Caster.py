@@ -21,6 +21,7 @@ class Game:
         self.Debug = False
         self.loop = False
         self.menu = True
+        self.Options = False
 
     def win_conditions(self, Player, Enemy): #self, Class, Class
         status = False
@@ -43,6 +44,7 @@ class Game:
             if self.game_over == True:
                 #Game Over!
                 Scene.print_message(1, True, "Menu", {})
+                self.return_to_menu(controller, Scene)
             elif self.game_over == False and self.can_lose == False:
                 #{Name} is defeated!
                 print(Scene.print_message(36, False, "Menu", {"{Name}": Enemy.Name["Value"]}))
@@ -136,6 +138,7 @@ class Game:
     def change_floors(self, Player, Scene, Controller, direction): #self, class, class, class, int(-1 or 1)
         for floor in range(len(self.tower)):
             if self.tower[floor].Name == self.current_floor:
+                self.tower[floor].loop = False
                 if direction == -1:
                     if floor > 0:
                         self.current_floor = self.tower[floor -1].Name
@@ -197,15 +200,16 @@ class Game:
     def main_menu(self, Player, Controller, Scene):
         self.menu = True
         print("-----------------------------------------------------------------------------------------------------------------------")
-        print("                                                  Spell Caster                                                Ver.1.01 ")
+        print("                                                  Spell Caster                                                Ver.1.10 ")
         print("-----------------------------------------------------------------------------------------------------------------------")
-        print(Scene.print_header("Type Your Selection"))
+        #Type your selection
+        print(Scene.print_header(Scene.print_message(92, False, "Menu", {})))
         print(" * About")
         print(" * New Game")
         file = Files()
         if file.Continue() == True:
             print(" * Continue")
-        print(" * Options")
+            print(" * Options")
         print(" * Cheats")
         print(" * Credits")
         print(" * Quit")
@@ -234,24 +238,43 @@ class Game:
         print("-----------------------------------------------------------------------------------------------------------------------")
         print("                                               About Spell Caster")
         print("-----------------------------------------------------------------------------------------------------------------------")
+        print(" Welcome to the world of Spell Caster!")
+        print(" In this game, you play as a young witch or wizard")
+        print(" An evil witch has transformed your best friend into a frog and threatens to take over the world!")
+        print(" It is up to you to learn new spells, defeat the evil witch, and help change your friend back!")
+        print("")
+        print("")
+        #Type back to Exit
+        print(Scene.print_message(65, False, "Menu", {}))
+        loop = True
+        while loop == True:
+            response = Controller.get_response(Player, False)
+            if Controller.bools["Exit"] == True:
+                loop = False
+                self.main_menu(Player, Controller, Scene)
 
     def options(self, Player, Controller, Scene, File):
+        self.Options = True
         print("-----------------------------------------------------------------------------------------------------------------------")
         print("                                                    Options")
         print("-----------------------------------------------------------------------------------------------------------------------")
-        #If save exists:
-            #Change Names
-            #Delete Save
-        #Set shortcut keys?
-            #1 = Fire
-            #2 = Attack
-            #etc...
+        #Type back to Exit
+        print(Scene.print_message(65, False, "Menu", {}))
+        #Type Your Selection
+        print(Scene.print_header(Scene.print_message(92, False, "Menu", {})))
+        print(" * Change Names")
+        print(" * Delete Save Data")
+        self.loop = True
+        while self.loop == True:
+            Controller.get_command(Player, File, self, Scene)
 
     def cheats(self, Player, Controller, Scene):
         print("-----------------------------------------------------------------------------------------------------------------------")
         print("                                                     Cheats")
         print("-----------------------------------------------------------------------------------------------------------------------")
+        #Type Back to Exit
         print(Scene.print_message(65, False, "Menu", {}))
+        #Enter Password
         print(Scene.print_header(Scene.make_line(89, "Menu", {})))
         loop = True
         while loop == True:
@@ -269,6 +292,34 @@ class Game:
         print("-----------------------------------------------------------------------------------------------------------------------")
         print("                                                     Credits")
         print("-----------------------------------------------------------------------------------------------------------------------")
+        print("                                                     Story By")
+        print("                                                  Daniel Navarro")
+        print("")
+        print("                                                    Programming")
+        print("                                                  Daniel Navarro")
+        print("")
+        print("                                            Assistant to the Programmer")
+        print("                                                   Iroh the Cat")
+        print("")
+        print("                                                    QA Testers")
+        print("                                                  Daniel Navarro")
+        print("                                                  Madhu Kottalam")
+        print("")
+        print("                                                  Special Thanks")
+        print("                                                   Jey Kottalam")
+        print("                                                  Madhu Kottalam")
+        print("                                                  Estella Garcia")
+        print("                                                   Iroh the Cat")
+        print("")
+        print("")
+        #Type back to Exit
+        print(Scene.print_message(65, False, "Menu", {}))
+        loop = True
+        while loop == True:
+            response = Controller.get_response(Player, False)
+            if Controller.bools["Exit"] == True:
+                loop = False
+                self.main_menu(Player, Controller, Scene)
 
     def quit(self, Player, Controller, Scene):
         print("-----------------------------------------------------------------------------------------------------------------------")
@@ -282,22 +333,24 @@ class Game:
             if Controller.bools["Yes"] == True:
                 loop = False
                 if self.menu == False:
-                    #Return to main menu?
-                    loop = True
-                    while loop == True:
-                        print(Scene.print_message(88, False, "Menu", {}))
-                        response = Controller.get_response(Player, False)
-                        if Controller.bools["Yes"] == True:
-                            loop = False
-                            self.initialize()
-                        elif Controller.bools["No"] == True:
-                            loop = False
+                    self.return_to_menu(Controller, Scene)
             elif Controller.bools["No"] == True:
                 loop = False
                 if self.menu == True:
                     self.initialize()
 
     def initialize(self):
+        self.tutorial = False
+        self.game_over = False
+        self.battle = False
+        self.can_lose = False
+        self.next_turn = True
+        self.in_dungeon = False
+        self.turn = 0
+        self.win_condition = "Death"
+        self.tower = []
+        self.current_floor = ""
+        self.loop = False
         player = Player(1, "Magicko")
         Controller = Command(player)
         Narrator = Scene(player)
@@ -361,13 +414,29 @@ class Game:
 
         #Dungeon 5
         dungeon5 = Dungeon("Lightning Dungeon", 44, [], 5, ["Lightning", "Normal"], 9)
+        dungeon5.bottom_floor = True
 
         self.tower = [dungeon5, dungeon4, dungeon3, dungeon2, dungeon1, 
                     ground_floor, 
                     tower1, tower2, tower3, tower4, tower5]
         self.main_menu(player, Controller, Narrator)
+
+    def return_to_menu(self, Controller, Scene):
+        loop = True
+        while loop == True:
+            #Return to Main Menu?
+            print(Scene.print_message(88, False, "Menu", {}))
+            response = Controller.get_response(Player, False)
+            if Controller.bools["Yes"] == True:
+                loop = False
+                self.initialize()
+            elif Controller.bools["No"] == True:
+                loop = False
 #---------------------------------------------------------------------------------------------------------------------------------------
 #                                                           Game Path
 #---------------------------------------------------------------------------------------------------------------------------------------
+#file = Files()
+#file.fix(Page, Row, Column, Value)
+         #Page, Row, Column, Value
 Game_State = Game()
 Game_State.initialize()

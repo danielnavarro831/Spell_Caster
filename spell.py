@@ -22,7 +22,7 @@ class Spell:
                         if Player.HP["Value"] > Player.HP["Max"]:
                             Player.HP["Value"] = Player.HP["Max"]
                         #{Name} restored {Amount} {Stat}
-                        print(Scene.print_message(4, False, "Menu", {"{Name}": Player.Name["Name"], "{Amount}": amount, "{Stat}": Player.HP["Name"]}))
+                        print(Scene.print_message(4, False, "Menu", {"{Name}": Player.Name["Value"], "{Amount}": amount, "{Stat}": Player.HP["Name"]}))
                     if Player.Stats[stat]["Name"] == Player.Sand["Name"]:
                         Enemy.Accuracy["Value"] = Enemy.Accuracy["Max"] - Player.Sand["Value"]
                         #{Name}'s {Spell} rages on!
@@ -206,6 +206,8 @@ class Spell:
                         Player.Stats[stat]["Value"] = Player.Stats[stat]["Init"]
                         #{Name} learned {Spell}
                         Scene.print_message(19, True, "Menu", {"{Name}": Player.Name["Value"], "{Spell}": Player.Stats[stat]["Name"]})
+                        if "Max" in Player.Stats[stat]:
+                            Player.Stats[stat]["Max"] = 3
                     else:
                         #Prereqs not met
                         Scene.print_message(27, True, "Menu", {})

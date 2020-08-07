@@ -326,10 +326,10 @@ class Command:
             print(" * Debug: Inventory Filled")
         elif word == "Avada Kedavra" and Game_State.Debug == True:
             self.kill(Enemy, Game_State)
-        elif word == "Deplete MP" and Game_State.Debug == True:
+        elif word == "No MP" and Game_State.Debug == True:
             self.depletemp(Player)
             Game_State.next_turn = False
-        elif word == "Deplete HP" and Game_State.Debug == True:
+        elif word == "No HP" and Game_State.Debug == True:
             self.depletehp(Player)
             Game_State.next_turn = False
         elif word == self.Cheat:
@@ -415,21 +415,15 @@ class Command:
         elif self.bools["Status"] == True:
             print(Player.Scan(Scene))
         #---------------------------------------------------------------------
-        #                         Continue Fighting
-        #---------------------------------------------------------------------
-        elif self.bools["Attack"] == True and type(Room) is Dungeon:
-            if Room.Steps_Taken >= Room.Steps: 
-                #Continue Fighting
-                Room.start_battle(Player, Scene, self, Game_State)
-            else:
-                Room.Loop = False
-        #---------------------------------------------------------------------
         #                   Continue Walking Through Dungeon
         #---------------------------------------------------------------------
         elif self.bools["Attack"] == True or self.bools["Resume"] == True and type(Room) is Dungeon:
             #Take next step in dungeon
             if Room.Steps_Taken < Room.Steps:
-                Room.Loop = False
+                Room.action = False
+            else:
+                #Continue Fighting
+                Room.start_battle(Player, Scene, self, Game_State)
         #---------------------------------------------------------------------
         #                               Save
         #---------------------------------------------------------------------
@@ -447,10 +441,10 @@ class Command:
         elif response == "Solve" and Game_State.Debug == True:
             self.solve(Room)
             print(" * Debug: Room Solved")
-        elif response == "Deplete MP" and Game_State.Debug == True:
+        elif response == "No MP" and Game_State.Debug == True:
             self.depletemp(Player)
             print(" * Debug: MP Depleted")
-        elif response == "Deplete HP" and Game_State.Debug == True:
+        elif response == "No HP" and Game_State.Debug == True:
             self.depletehp(Player)
             print(" * Debug: HP Depleted")
         elif response == "Level" and Game_State.Debug == True:
@@ -508,45 +502,65 @@ class Command:
 #---------------------------------------------------------------------------------------------------------------------------------------
     def translate_main_menu_command(self, Response, Player, File, Game_State, Scene):
         Response = Response.title()
+        if Game_State.Options == False:
+            #---------------------------------------------------------------------
+            #                             About
+            #---------------------------------------------------------------------
+            if Response == "About":
+                Game_State.loop = False
+                Game_State.about(Player, self, Scene)
+            #---------------------------------------------------------------------
+            #                            New Game
+            #---------------------------------------------------------------------
+            elif Response == "New Game":
+                Game_State.loop = False
+                Game_State.menu = False
+                Game_State.start_game(Player, self, Scene)
+            #---------------------------------------------------------------------
+            #                             Continue
+            #---------------------------------------------------------------------
+            elif Response == "Continue" and File.Continue() == True:
+                Game_State.loop = False
+                Game_State.menu = False
+                print(Scene.print_message(90, False, "Menu", {}))
+                File.load(Player, Game_State, self, Scene)
+            #---------------------------------------------------------------------
+            #                             Options
+            #---------------------------------------------------------------------
+            elif Response == "Options" and File.Continue() == True:
+                Game_State.loop = False
+                Game_State.options(Player, self, Scene, File)
+            #---------------------------------------------------------------------
+            #                             Cheats
+            #---------------------------------------------------------------------
+            elif Response == "Cheats":
+                Game_State.loop = False
+                Game_State.cheats(Player, self, Scene)
+            #---------------------------------------------------------------------
+            #                             Credits
+            #---------------------------------------------------------------------
+            elif Response == "Credits":
+                Game_State.loop = False
+                Game_State.credits(Player, self, Scene)
+            #---------------------------------------------------------------------
+            #                              Quit
+            #---------------------------------------------------------------------
+            elif Response == "Quit":
+                Game_State.loop = False
+                Game_State.quit(Player, self, Scene)
+        else: #In Options Menu
         #---------------------------------------------------------------------
-        #                             About
+        #                              Options
         #---------------------------------------------------------------------
-        if Response == "About":
-            Game_State.loop = False
-        #---------------------------------------------------------------------
-        #                            New Game
-        #---------------------------------------------------------------------
-        elif Response == "New Game":
-            Game_State.loop = False
-            Game_State.menu = False
-            Game_State.start_game(Player, self, Scene)
-        #---------------------------------------------------------------------
-        #                             Continue
-        #---------------------------------------------------------------------
-        elif Response == "Continue" and File.Continue() == True:
-            Game_State.loop = False
-            Game_State.menu = False
-            print(Scene.print_message(90, False, "Menu", {}))
-            File.load(Player, Game_State, self, Scene)
-        #---------------------------------------------------------------------
-        #                             Options
-        #---------------------------------------------------------------------
-        elif Response == "Options":
-            Game_State.loop = False
-        #---------------------------------------------------------------------
-        #                             Cheats
-        #---------------------------------------------------------------------
-        elif Response == "Cheats":
-            Game_State.loop = False
-            Game_State.cheats(Player, self, Scene)
-        #---------------------------------------------------------------------
-        #                             Credits
-        #---------------------------------------------------------------------
-        elif Response == "Credits":
-            Game_State.loop = False
-        #---------------------------------------------------------------------
-        #                              Quit
-        #---------------------------------------------------------------------
-        elif Response == "Quit":
-            Game_State.loop = False
-            Game_State.quit(Player, self, Scene)
+            if Response == "Change Names":
+                File.choose_rename(Player, self, Scene)
+                Game_State.options(Player, self, Scene, File)
+            elif Response == "Delete Save Data":
+                File.delete_save_data(Player, self, Scene)
+                Game_State.Options = False
+                Game_State.loop = False
+                Game_State.initialize()
+            elif self.bools["Exit"] == True:
+                Game_State.Options = False
+                Game_State.loop = False
+                Game_State.main_menu(Player, self, Scene)
