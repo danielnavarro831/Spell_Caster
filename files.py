@@ -153,6 +153,8 @@ class Files:
                             All_Stats[a]["Casts"] = Stats.cell(row = counter, column = 3).value
                         if "Max" in All_Stats[a]:
                             All_Stats[a]["Max"] = Stats.cell(row = counter, column = 4).value
+                        if All_Stats[a]["Name"] == "HP" or All_Stats[a]["Name"] == "MP":
+                            All_Stats[a]["Value"] = All_Stats[a]["Max"]
                         break
             else:
                 continue
