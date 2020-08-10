@@ -153,9 +153,9 @@ class Actor:
                                 print(Scene.print_message(4, False, "Menu", {"{Name}": self.Name["Value"], "{Amount}": hp_restored, "{Stat}": self.HP["Name"]}))
                                     
     def calculate_MP(self, spell): #self, {"spell": "dict"}
-        spell_cost = int((spell["Value"] * self.Magic["Value"]) / 5)
+        spell_cost = int((spell["Value"] * self.Magic["Value"]) / 2)
         if "duration" in spell:
-            spell_cost = int((spell["Value"] * spell["Max"]) / 2)
+            spell_cost = int((spell["Value"] * spell["Max"]) / 5)
         return spell_cost
 
     def spend_MP(self, spell, game_state, Scene): #self, "Spell", Class, Class
@@ -427,13 +427,37 @@ class Player(Actor):
         return spellbook
 
     def get_inventory(self, Scene): #self, Class
+        consumables = []
+        ingredients = []
+        key_items = []
         if len(self.Inventory) > 0:
             items = False
-            print(Scene.print_message(55, False, "Menu", {}))
+            print(Scene.print_message(102, False, "Menu", {}))
             for a in self.Inventory.keys():
                 if self.Inventory[a] > 0:
-                    print(" * " + a + ": " + str(self.Inventory[a]))
+                    item = Item(a)
+                    if item.Info["Consumable"] == True:
+                        consumables.append(a)
+                    elif item.Info["Ingredient"] == True:
+                        ingredients.append(a)
+                    elif item.Info["Key"] == True:
+                        key_items.append(a)
                     items = True
+                    item.__delete__()
+            if items == True:
+                print(Scene.print_message(55, False, "Menu", {}))
+            if len(consumables) > 0:
+                print(Scene.print_header("Consuambles"))
+                for a in range(len(consumables)):
+                    print(" * " + consumables[a] + "  x" + str(self.Inventory[consumables[a]]))
+            if len(ingredients) > 0:
+                print(Scene.print_header("Ingredients"))
+                for a in range(len(ingredients)):
+                    print(" * " + ingredients[a] + "  x" + str(self.Inventory[ingredients[a]]))
+            if len(key_items) > 0:
+                print(Scene.print_header("Key Items"))
+                for a in range(len(key_items)):
+                    print(" * " + key_items[a] + "  x" + str(self.Inventory[key_items[a]]))
             if items == False:
                 #Nothing in inventory
                 print(Scene.print_message(45, False, "Menu", {}))
@@ -576,7 +600,19 @@ class Player(Actor):
                 while Sheet.cell(row, 0).value != response:
                     row += 1
                     if Sheet.cell(row, 0).value == response:
-                        recipe = " " + response + ": " + Sheet.cell(row, 1).value + ", " + Sheet.cell(row, 2).value + ", " + Sheet.cell(row, 3).value
+                        ing1 = ""
+                        ing2 = ""
+                        ing3 = ""
+                        if Sheet.cell(row, 1).value in self.Inventory:
+                            if self.Inventory[Sheet.cell(row, 1).value] > 0:
+                                ing1 = "*"
+                        if Sheet.cell(row, 2).value in self.Inventory:
+                            if self.Inventory[Sheet.cell(row, 2).value] > 0:
+                                ing2 = "*"
+                        if Sheet.cell(row, 3).value in self.Inventory:
+                            if self.Inventory[Sheet.cell(row, 3).value] > 0:
+                                ing3 = "*"
+                        recipe = " " + response + ": " + Sheet.cell(row, 1).value + ing1 + ", " + Sheet.cell(row, 2).value + ing2 + ", " + Sheet.cell(row, 3).value + ing3
                         print(recipe)
                         loop = False
             elif response in Controller.exit:

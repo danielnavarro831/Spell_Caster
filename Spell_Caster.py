@@ -200,7 +200,7 @@ class Game:
     def main_menu(self, Player, Controller, Scene):
         self.menu = True
         print("-----------------------------------------------------------------------------------------------------------------------")
-        print("                                                  Spell Caster                                                Ver.1.10 ")
+        print("                                                  Spell Caster                                                Ver.1.11 ")
         print("-----------------------------------------------------------------------------------------------------------------------")
         #Type your selection
         print(Scene.print_header(Scene.print_message(92, False, "Menu", {})))

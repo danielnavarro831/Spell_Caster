@@ -135,7 +135,7 @@ class Spell:
 
     def Cure_Condition(self, Player): #self, Class
         meets_condition = False
-        if Player.Sacrifice["Value"] >= 100:
+        if Player.Sacrifice["Value"] >= 10:
             meets_condition = True
         return meets_condition
 
@@ -237,7 +237,7 @@ class Spell:
                             Scene.print_message(29, True, "Menu", {"{Spell}": Player.Stats[stat]["Name"]})
                             loop = False
                 else:
-                    Player.Stats[stat]["Value"] += 1
+                    Player.Stats[stat]["Value"] += 2
                     print(Scene.print_message(29, False, "Menu", {"{Spell}": Player.Stats[stat]["Name"]}))
 
     def learn_exp_spells(self, Player, Scene): #self, Class, Class
