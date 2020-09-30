@@ -63,9 +63,6 @@ class Game:
             if self.game_over == True:
                 #Game Over!
                 self.story = False
-                Scene.clear_screen()
-                Scene.screen.addstr(Scene.line, 1, Scene.print_header(Scene.make_line(1, "Menu", {})))
-                Scene.line += 3
                 self.return_to_menu(controller, Scene, Player)
             elif self.game_over == False and self.can_lose == False:
                 Scene.log = []
@@ -157,9 +154,11 @@ class Game:
     def change_floors(self, Player, Scene, Controller, direction): #self, class, class, class, int(-1 or 1)
         for floor in range(len(self.tower)):
             if self.tower[floor].Name == self.current_floor:
-                self.tower[floor].loop = False
+                #if self.tower[floor].bottom_floor != True:
+                    #self.tower[floor].loop = False
                 if direction == -1:
                     if floor > 0:
+                        self.tower[floor].loop = False
                         self.current_floor = self.tower[floor -1].Name
                         if type(self.tower[floor -1]) is Dungeon:
                             self.tower[floor -1].enter_dungeon(Player, Scene, Controller, self)
@@ -174,6 +173,7 @@ class Game:
                         break
                 else:
                     if floor < len(self.tower):
+                        self.tower[floor].loop = False
                         self.current_floor = self.tower[floor+1].Name
                         if type(self.tower[floor+1]) is Dungeon:
                             self.tower[floor+1].enter_dungeon(Player, Scene, Controller, self)
@@ -225,7 +225,7 @@ class Game:
         Scene.line += 1
         Scene.screen.addstr(Scene.line, 1, "                                                  Spell Caster", Scene.cyan)
         Scene.screen.addstr(Scene.line, 110, "Ver: ")
-        Scene.screen.addstr("2.00", Scene.cyan)
+        Scene.screen.addstr("2.01", Scene.cyan)
         Scene.line += 1
         Scene.screen.addstr(Scene.line, 1, "-----------------------------------------------------------------------------------------------------------------------")
         Scene.line += 1
@@ -264,7 +264,6 @@ class Game:
             Scene.clear_screen()
             self.story = True
             self.spellbook = True
-            #self.in_tower = True
         #Enter Tower
         self.current_floor = self.tower[5].Name
         self.tower[5].enter_room(Player, Scene, Controller, self)
@@ -560,8 +559,12 @@ class Game:
     def return_to_menu(self, Controller, Scene, Player):
         loop = True
         while loop == True:
+            Scene.clear_screen()
             #Return to Main Menu?
-            Scene.screen.addstr(Scene.line, 1, Scene.print_message(88, False, "Menu", {}))
+            if self.game_over == True:
+                Scene.screen.addstr(Scene.line, 1, Scene.print_header(Scene.make_line(1, "Menu", {})))
+                Scene.line += 3
+            Scene.screen.addstr(Scene.line, 1, Scene.make_line(88, "Menu", {}))
             Scene.line += 1
             response = Controller.get_response(Player, False, Scene)
             if Controller.bools["Yes"] == True:
@@ -570,9 +573,10 @@ class Game:
             elif Controller.bools["No"] == True:
                 loop = False
                 self.Story = False
-                Scene.clear_screen()
-                Scene.screen.addstr(Scene.line, 1, "Thanks for Playing!")
+                Scene.screen.clear()
+                Scene.screen.addstr(0, 1, "Thanks for Playing!")
                 response = Controller.get_response(Player, False, Scene)
+                break
 
     def Story_UI(self, Player, Scene, Command):
         Scene.player_HUD(Player, self)

@@ -562,7 +562,6 @@ class Command:
             elif Response == "Continue" and File.Continue() == True:
                 Game_State.loop = False
                 Game_State.menu = False
-                self.screen.addstr(Scene.print_message(90, False, "Menu", {}))
                 File.load(Player, Game_State, self, Scene)
             #---------------------------------------------------------------------
             #                             Options

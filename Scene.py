@@ -1056,6 +1056,7 @@ class Scene():
                 agatha.Name["Value"] = Player.Speakers["Agatha"]
                 Game_State.start_battle(Player, agatha, Controller, self)
                 if Game_State.game_over == False:
+                    loop = False
                     self.Top_of_Tower_post_battle(Player, Controller, Game_State, Path)
                 loop = False
             elif Controller.bools["Yes"] == True:
@@ -1069,6 +1070,7 @@ class Scene():
                 merlin.Name["Value"] = Player.Speakers["Grandfather"]
                 Game_State.start_battle(Player, merlin, Controller, self)
                 if Game_State.game_over == False:
+                    loop = False
                     self.Top_of_Tower_post_battle(Player, Controller, Game_State, Path)
                 loop = False
             else:
@@ -1085,3 +1087,6 @@ class Scene():
             self.print_message([*range(150, 160)], True, "Story", [{"{Name}": Player.Name["Value"]}, {}, {"{Agatha}": Player.Speakers["Agatha"], "{Merlin}": Player.Speakers["Grandfather"]},
                                                                    {}, {"{Merlin}": Player.Speakers["Grandfather"]}, {}, {"{Name}": Player.Name["Value"]}, {"{Name}": Player.Speakers["Friend"]}, {"{Agatha}": Player.Speakers["Agatha"]}, {}])
         self.print_message(179, True, "Story", {})
+        Game_State.story = False
+        Game_State.game_over = True
+        Game_State.return_to_menu(Controller, self, Player)

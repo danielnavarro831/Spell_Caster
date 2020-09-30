@@ -102,6 +102,7 @@ class Room(Interactable):
         self.Interactables = interactables
         self.Floor = 0
         self.loop = False
+        self.bottom_floor = False
 
     def enter_room(self, Player, Scene, Controller, Game_State): #self, Class, Class, Class
         Game_State.in_dungeon = False
@@ -140,6 +141,8 @@ class Room(Interactable):
                     Scene.log = []
                     Scene.help_text(112, {})
                     Controller.get_command(Player, self, Game_State, Scene)
+                    if Game_State.current_floor != self.Name:
+                        break
                     if self.Interactables[0].Solved == True:
                         Scene.log.append(Scene.make_line(105, "Story", {}))
                         Scene.log.append(Scene.make_line(41, "Menu", {"{Name}":Player.Name["Value"], "{Item}": "an Old Key"}))
@@ -163,6 +166,8 @@ class Room(Interactable):
                 Scene.log = []
                 Scene.help_text(113, {})
                 Controller.get_command(Player, self, Game_State, Scene)
+                if Game_State.current_floor != self.Name:
+                    break
 
     def tower1(self, Player, Scene, Controller, Game_State): #self, Class, Class, Class
         Game_State.tower1 = True
@@ -191,6 +196,8 @@ class Room(Interactable):
                 Scene.log = []
                 Scene.help_text(114, {})
                 Controller.get_command(Player, self, Game_State, Scene)
+                if Game_State.current_floor != self.Name:
+                    break
                 if "Fire" in self.Interactables[0].Name:
                     if self.Interactables[0].Solved == True:
                         self.Counter += 1
@@ -264,6 +271,8 @@ class Room(Interactable):
                 else:
                     Scene.help_text(113, {})
                 Controller.get_command(Player, self, Game_State, Scene)
+                if Game_State.current_floor != self.Name:
+                    break
                 if treasure == True:
                     for a in range(len(self.Interactables)):
                         if self.Interactables[a].Name == "Chest":
@@ -309,6 +318,8 @@ class Room(Interactable):
                             Scene.line += 1
                     Scene.log = []
                     Controller.get_command(Player, self, Game_State, Scene)
+                    if Game_State.current_floor != self.Name:
+                        break
                     if "Water" in self.Interactables[0].Keys[0]["Name"]:
                         if self.Interactables[0].Solved == True:
                             self.Interactables[0].Name = ["Cauldron", "Dragon Scale", "Scale"]
@@ -434,6 +445,8 @@ class Room(Interactable):
                 Scene.log = []
                 Scene.help_text(113, {})
                 Controller.get_command(Player, self, Game_State, Scene)
+                if Game_State.current_floor != self.Name:
+                    break
 
     def tower3(self, Player, Scene, Controller, Game_State): #self, Class, Class, Class
         Game_State.tower3 = True
@@ -469,6 +482,8 @@ class Room(Interactable):
                 Scene.log = []
                 Scene.help_text(114, {})
                 Controller.get_command(Player, self, Game_State, Scene)
+                if Game_State.current_floor != self.Name:
+                    break
                 remove = False
                 add = False
                 pos = 0
@@ -579,6 +594,8 @@ class Room(Interactable):
                 Scene.log = []
                 Scene.help_text(113, {})
                 Controller.get_command(Player, self, Game_State, Scene)
+                if Game_State.current_floor != self.Name:
+                    break
                 for a in range(len(self.Interactables)):
                     if "Chest" in self.Interactables[a].Name:
                         if self.Interactables[a].Solved == True:
@@ -658,6 +675,8 @@ class Room(Interactable):
                 else:
                     Scene.help_text(114, {})
                 Controller.get_command(Player, self, Game_State, Scene)
+                if Game_State.current_floor != self.Name:
+                    break
                 for a in range(len(self.Interactables)):
                     if "Circuit Board" in self.Interactables[a].Name:
                         if self.Interactables[a].Solved == True:
@@ -789,6 +808,8 @@ class Room(Interactable):
                 Scene.log = []
                 Scene.help_text(113, {})
                 Controller.get_command(Player, self, Game_State, Scene)
+                if Game_State.current_floor != self.Name:
+                    break
                 for a in range(len(self.Interactables)):
                     if "Chest" in self.Interactables[a].Name:
                         if self.Interactables[a].Solved == True:
@@ -885,6 +906,9 @@ class Dungeon(Room):
                     Scene.screen.addstr(Scene.line, 1, Scene.print_header(self.Name))
                     Scene.line += 3
                     self.start_battle(Player, Scene, Controller, Game_State)
+                    if Game_State.game_over == True:
+                        self.loop = False
+                        break
                     self.Steps_Taken += 1
                     self.action = True
                     if self.Steps_Taken >= self.Steps and Game_State.game_over == False:
@@ -918,6 +942,11 @@ class Dungeon(Room):
                         else:
                             Scene.help_text(119, {})
                         response = Controller.get_command(Player, self, Game_State, Scene)
+                        if Game_State.current_floor != self.Name:
+                            break
+                        if Game_State.game_over == True:
+                            self.loop = False
+                            break
             else:
                 while self.loop == True and Game_State.game_over == False:
                     Scene.clear_screen()
@@ -942,6 +971,11 @@ class Dungeon(Room):
                     Scene.log = []
                     Scene.help_text(120, {})
                     response = Controller.get_command(Player, self, Game_State, Scene)
+                    if Game_State.current_floor != self.Name:
+                        break
+                    if Game_State.game_over == True:
+                        self.loop = False
+                        break
     
     def start_battle(self, Player, Scene, Controller, Game_State): #self, Class, Class, Class, Class
         if self.Steps_Taken == self.Steps -1:
@@ -954,7 +988,7 @@ class Dungeon(Room):
             random.shuffle(Loot)
             enemy = Enemy(self.Level, "", self.Type[0], [self.Type[0]], Game_State.get_loot_drops(Loot[0]))
             enemy.add_variance(self.Type[0])
-            #A {Name} appeard!
+            #A {Name} appeared!
         Scene.screen.addstr(Scene.line, 1, "* ", Scene.green)
         Scene.screen.addstr(Scene.line_randomizer([37, 38, 39], "Menu", [{"{Name}": enemy.Name["Value"]}, {"{Name}": enemy.Name["Value"]}, {"{Name}": enemy.Name["Value"]}]))
         Scene.help_text(106, {})
